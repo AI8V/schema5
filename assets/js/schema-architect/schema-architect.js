@@ -2453,18 +2453,40 @@
 
     // Copy button
     DOM.copyBtn.addEventListener('click', () => {
-        if (!DOM.copyBtn.disabled && DOM.generatedCode.value) {
+    if (!DOM.copyBtn.disabled && DOM.generatedCode.value) {
+        // Check if running inside DevTools
+        if (window.parent !== window) {
+            // Send message to parent (DevTools panel)
+            window.parent.postMessage({
+                type: 'COPY_SCHEMA',
+                schema: DOM.generatedCode.value
+            }, '*');
+            
+            // Listen for response
+            const handleCopyResponse = (event) => {
+                if (event.data.type === 'COPY_SUCCESS') {
+                    updateActionButtonsState(true, `<i class="bi bi-check-lg me-1"></i> Copied!`);
+                    setTimeout(() => updateActionButtonsState(true, 'Copy'), 2000);
+                    window.removeEventListener('message', handleCopyResponse);
+                } else if (event.data.type === 'COPY_FAILED') {
+                    showToast('Failed to copy to clipboard.', 'danger');
+                    window.removeEventListener('message', handleCopyResponse);
+                }
+            };
+            window.addEventListener('message', handleCopyResponse);
+        } else {
+            // Original clipboard logic for standalone use
             navigator.clipboard.writeText(DOM.generatedCode.value)
                 .then(() => {
                     updateActionButtonsState(true, `<i class="bi bi-check-lg me-1"></i> Copied!`);
                     setTimeout(() => updateActionButtonsState(true, 'Copy'), 2000);
                 })
                 .catch(err => {
-                    console.error('Failed to copy text: ', err);
                     showToast('Failed to copy to clipboard.', 'danger');
                 });
         }
-    });
+    }
+});
 
     // Download button
     DOM.downloadBtn.addEventListener('click', () => {
@@ -2483,18 +2505,24 @@
 
     // Validate button
     DOM.validateBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        if (!DOM.validateBtn.disabled && DOM.generatedCode.value) {
+    e.preventDefault();
+    if (!DOM.validateBtn.disabled && DOM.generatedCode.value) {
+        if (window.parent !== window) {
+            // Send message to parent to open validator
+            navigator.clipboard.writeText(DOM.generatedCode.value).then(() => {
+                window.parent.postMessage({
+                    type: 'OPEN_VALIDATOR'
+                }, '*');
+            });
+        } else {
+            // Original logic for standalone use
             navigator.clipboard.writeText(DOM.generatedCode.value)
                 .then(() => {
                     window.open('https://search.google.com/test/rich-results', '_blank');
-                })
-                .catch(err => {
-                    console.error('Could not copy code: ', err);
-                    showToast('Could not copy code to clipboard. Please copy it manually.', 'danger');
                 });
         }
-    });
+    }
+});
 
     // Copy enhanced prompt button
     DOM.copyEnhancedPromptBtn.addEventListener('click', () => {
