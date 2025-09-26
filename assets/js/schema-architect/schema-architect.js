@@ -2568,6 +2568,10 @@
         });
     }
 
+    // Initialize Bootstrap Tooltips for enhanced UX
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+
     // Activate the listener
     listenForDevTools();
 })();
