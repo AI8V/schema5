@@ -2438,133 +2438,135 @@
     }
 
     // ===================================================================
-    //  Event Listeners
+    //  Event Listeners (Now DevTools-Aware)
     // ===================================================================
 
-    // Base URL input toggle
+    /**
+     * Checks if the tool is running inside the DevTools iframe.
+     * @returns {boolean} True if inside an iframe.
+     */
+    function isInsideDevTools() {
+        try {
+            // This will throw an error in a cross-origin iframe, which is what we have in DevTools.
+            return window.self !== window.top;
+        } catch (e) {
+            // The error confirms we are in a cross-origin context, likely DevTools.
+            return true;
+        }
+    }
+
+    // --- Base URL input toggle ---
     if (DOM.htmlContentInput && DOM.baseUrlContainer) {
         DOM.htmlContentInput.addEventListener('input', () => {
             DOM.baseUrlContainer.style.display = DOM.htmlContentInput.value.trim() ? 'block' : 'none';
         });
     }
 
-    // Analyze button
+    // --- Analyze button ---
     DOM.analyzeBtn.addEventListener('click', handleAnalysis);
+
+    // --- CONTEXT-AWARE ACTION BUTTONS ---
 
     // Copy button
     DOM.copyBtn.addEventListener('click', () => {
-        if (!DOM.copyBtn.disabled && DOM.generatedCode.value) {
-            navigator.clipboard.writeText(DOM.generatedCode.value)
-                .then(() => {
+        const codeToCopy = DOM.generatedCode.value;
+        if (!DOM.copyBtn.disabled && codeToCopy) {
+            if (isInsideDevTools()) {
+                window.parent.postMessage({ type: 'DELEGATE_ACTION', action: 'copy', data: codeToCopy }, '*');
+                // The button state is now handled by the extension panel, but we can give instant feedback.
+                updateActionButtonsState(true, `<i class="bi bi-check-lg me-1"></i> Sent!`);
+                setTimeout(() => updateActionButtonsState(true, 'Copy'), 2000);
+            } else {
+                navigator.clipboard.writeText(codeToCopy).then(() => {
                     updateActionButtonsState(true, `<i class="bi bi-check-lg me-1"></i> Copied!`);
                     setTimeout(() => updateActionButtonsState(true, 'Copy'), 2000);
-                })
-                .catch(err => {
-                    console.error('Failed to copy text: ', err);
-                    showToast('Failed to copy to clipboard.', 'danger');
-                });
+                }).catch(err => showToast('Failed to copy to clipboard.', 'danger'));
+            }
         }
     });
 
     // Download button
     DOM.downloadBtn.addEventListener('click', () => {
-        if (!DOM.downloadBtn.disabled && DOM.generatedCode.value) {
-            const blob = new Blob([DOM.generatedCode.value], { type: 'application/ld+json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'schema.jsonld';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+        const codeToDownload = DOM.generatedCode.value;
+        if (!DOM.downloadBtn.disabled && codeToDownload) {
+            if (isInsideDevTools()) {
+                window.parent.postMessage({ type: 'DELEGATE_ACTION', action: 'download', data: codeToDownload }, '*');
+            } else {
+                const blob = new Blob([codeToDownload], { type: 'application/ld+json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'schema.jsonld';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
         }
     });
 
     // Validate button
     DOM.validateBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        if (!DOM.validateBtn.disabled && DOM.generatedCode.value) {
-            navigator.clipboard.writeText(DOM.generatedCode.value)
-                .then(() => {
+        const codeToValidate = DOM.generatedCode.value;
+        if (!DOM.validateBtn.disabled && codeToValidate) {
+            if (isInsideDevTools()) {
+                window.parent.postMessage({ type: 'DELEGATE_ACTION', action: 'validate', data: codeToValidate }, '*');
+            } else {
+                navigator.clipboard.writeText(codeToValidate).then(() => {
                     window.open('https://search.google.com/test/rich-results', '_blank');
-                })
-                .catch(err => {
-                    console.error('Could not copy code: ', err);
-                    showToast('Could not copy code to clipboard. Please copy it manually.', 'danger');
-                });
+                }).catch(err => showToast('Could not copy code to clipboard.', 'danger'));
+            }
         }
     });
 
     // Copy enhanced prompt button
     DOM.copyEnhancedPromptBtn.addEventListener('click', () => {
-        if (DOM.copyEnhancedPromptBtn.disabled || !selectedPrimaryType) {
-            return;
-        }
-
+        if (DOM.copyEnhancedPromptBtn.disabled || !selectedPrimaryType) return;
+        
         if (typeof DynamicPromptGenerator !== 'undefined') {
             const promptToCopy = DynamicPromptGenerator.generate(selectedPrimaryType);
-
             if (promptToCopy) {
-                navigator.clipboard.writeText(promptToCopy)
-                    .then(() => {
+                 if (isInsideDevTools()) {
+                    window.parent.postMessage({ type: 'DELEGATE_ACTION', action: 'copyPrompt', data: promptToCopy }, '*');
+                    DOM.copyEnhancedPromptBtn.innerHTML = '<i class="bi bi-check-lg me-2"></i> Sent!';
+                    setTimeout(() => {
+                        DOM.copyEnhancedPromptBtn.innerHTML = '<i class="bi bi-robot me-2"></i> Copy Full Enhancement Prompt';
+                    }, 2500);
+                 } else {
+                    navigator.clipboard.writeText(promptToCopy).then(() => {
                         DOM.copyEnhancedPromptBtn.innerHTML = '<i class="bi bi-check-lg me-2"></i> Copied Successfully!';
-                        DOM.copyEnhancedPromptBtn.classList.remove('btn-warning');
-                        DOM.copyEnhancedPromptBtn.classList.add('btn-success');
-
+                        DOM.copyEnhancedPromptBtn.classList.replace('btn-warning', 'btn-success');
                         setTimeout(() => {
                             DOM.copyEnhancedPromptBtn.innerHTML = '<i class="bi bi-robot me-2"></i> Copy Full Enhancement Prompt';
-                            DOM.copyEnhancedPromptBtn.classList.remove('btn-success');
-                            DOM.copyEnhancedPromptBtn.classList.add('btn-warning');
+                            DOM.copyEnhancedPromptBtn.classList.replace('btn-success', 'btn-warning');
                         }, 2500);
-                    })
-                    .catch(err => {
-                        console.error('Failed to copy prompt: ', err);
-                        showToast('Sorry, the copy operation failed.', 'danger');
-                    });
+                    }).catch(err => showToast('Sorry, the copy operation failed.', 'danger'));
+                 }
             }
         } else {
-            console.error('Error: DynamicPromptGenerator module is not defined.');
-            showToast('An error occurred while loading page components.', 'danger');
+             console.error('Error: DynamicPromptGenerator module is not defined.');
         }
     });
 
-    // Initialize external modules if available
-    if (typeof initializeProjectHub !== 'undefined') initializeProjectHub();
-    if (typeof initializeEmp !== 'undefined') initializeEmp();
 
-    // --- >> DEVTOOLS EXTENSION INTEGRATION V2 (ROBUST & SECURE) << ---
+    // ===================================================================
+    //  Module Initializers & DevTools Integration
+    // ===================================================================
+    
     /**
      * Listens for messages from the DevTools panel to enable remote control.
      */
     function listenForDevTools() {
         window.addEventListener('message', (event) => {
-            // --- SECURITY CHECK ---
-            // We only accept messages that have a specific structure and come from a trusted context.
-            // A simple origin check is not always reliable for extensions.
             const data = event.data;
-            if (!data || data.type !== 'ANALYZE_HTML' || !data.htmlContent) {
-                // Ignore messages that don't match our expected format.
-                return;
-            }
-
-            console.log('Received analysis request from DevTools panel.');
-
-            // 1. Populate the inputs with the received data
-            if (data.pageUrl) {
-                DOM.urlInput.value = data.pageUrl;
-            }
-            if (data.htmlContent) {
+            if (data && data.type === 'ANALYZE_HTML' && data.htmlContent) {
+                console.log('Received analysis request from DevTools panel.');
+                if (data.pageUrl) DOM.urlInput.value = data.pageUrl;
                 DOM.htmlContentInput.value = data.htmlContent;
-                // Trigger input event to show base URL field if needed
                 DOM.htmlContentInput.dispatchEvent(new Event('input'));
+                setTimeout(() => { DOM.analyzeBtn.click(); }, 100);
             }
-
-            // 2. Programmatically click the "Analyze Content" button
-            // Use a small timeout to ensure the DOM has updated with the new values
-            setTimeout(() => {
-                DOM.analyzeBtn.click();
-            }, 100);
         });
     }
 
@@ -2572,6 +2574,9 @@
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
 
-    // Activate the listener
+    // Initialize all modules
+    if (typeof initializeProjectHub === 'function') initializeProjectHub();
+    if (typeof initializeEmp === 'function') initializeEmp();
     listenForDevTools();
+
 })();
