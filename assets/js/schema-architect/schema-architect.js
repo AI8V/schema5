@@ -20,68 +20,84 @@
         copyEnhancedPromptBtn: document.getElementById('copyEnhancedPromptBtn'),
 
         // Custom selectors
-        faqItem: document.getElementById('customFaqItem'),
-        faqQuestion: document.getElementById('customFaqQuestion'),
-        faqAnswer: document.getElementById('customFaqAnswer'),
-        productPrice: document.getElementById('customProductPrice'),
-        productCurrency: document.getElementById('customProductCurrency'),
-        productSku: document.getElementById('customProductSku'),
-        productBrand: document.getElementById('customProductBrand'),
+        customFaqItem: document.getElementById('customFaqItem'),
+        customFaqQuestion: document.getElementById('customFaqQuestion'),
+        customFaqAnswer: document.getElementById('customFaqAnswer'),
+
+        // --- Custom Discovery Selectors ---
+        // These inputs provide CSS selectors to help find entities in the HTML.
+        customProductPrice: document.getElementById('customProductPrice'),
+        customProductCurrency: document.getElementById('customProductCurrency'),
+        customProductSku: document.getElementById('customProductSku'),
+        customProductBrand: document.getElementById('customProductBrand'),
+        // --- Direct Schema Enhancement Inputs ---
+        // These inputs directly provide values to enrich the final schema.
+        shippingRate: document.getElementById('customShippingRate'),
+        shippingCountry: document.getElementById('customShippingCountry'),
+        returnDays: document.getElementById('customReturnDays'),
+        returnFees: document.getElementById('customReturnFees'),
+
         customRecipeContainer: document.getElementById('customRecipeContainer'),
         customRecipeName: document.getElementById('customRecipeName'),
-        recipePrepTime: document.getElementById('customRecipePrepTime'),
-        recipeCookTime: document.getElementById('customRecipeCookTime'),
-        recipeIngredients: document.getElementById('customRecipeIngredients'),
-        customReviewContainer: document.getElementById('customReviewContainer'),
-        reviewRating: document.getElementById('customReviewRating'),
-        reviewItemName: document.getElementById('customReviewItemName'),
-        customHowToName: document.getElementById('customHowToName'),
-        customHowToContainer: document.getElementById('customHowToContainer'),
-        howToStep: document.getElementById('customHowToStep'),
-        howToText: document.getElementById('customHowToText'),
-        customEventName: document.getElementById('customEventName'),
-        eventStartDate: document.getElementById('customEventStartDate'),
-        eventLocation: document.getElementById('customEventLocation'),
-        eventOrganizer: document.getElementById('customEventOrganizer'),
-        orgLogo: document.getElementById('customOrgLogo'),
-        orgAddress: document.getElementById('customOrgAddress'),
-        orgTelephone: document.getElementById('customOrgTelephone'),
-        breadcrumbItem: document.getElementById('customBreadcrumbItem'),
-        customVideoContainer: document.getElementById('customVideoContainer'),
-        videoName: document.getElementById('customVideoName'),
-        videoDesc: document.getElementById('customVideoDesc'),
-        videoThumb: document.getElementById('customVideoThumb'),
-        videoUrl: document.getElementById('customVideoUrl'),
-        videoDate: document.getElementById('customVideoDate'),
+        customRecipePrepTime: document.getElementById('customRecipePrepTime'),
+        customRecipeCookTime: document.getElementById('customRecipeCookTime'),
+        customRecipeIngredients: document.getElementById('customRecipeIngredients'),
         customRecipeInstructions: document.getElementById('customRecipeInstructions'),
-        customBizPriceRange: document.getElementById('customBizPriceRange'),
-        customBizOpeningHours: document.getElementById('customBizOpeningHours'),
+
+        customReviewContainer: document.getElementById('customReviewContainer'),
+        customReviewRating: document.getElementById('customReviewRating'),
+        customReviewItemName: document.getElementById('customReviewItemName'),
+
+        customHowToContainer: document.getElementById('customHowToContainer'),
+        customHowToName: document.getElementById('customHowToName'),
+        customHowToStep: document.getElementById('customHowToStep'),
+        customHowToText: document.getElementById('customHowToText'),
+
+        customBreadcrumbItem: document.getElementById('customBreadcrumbItem'),
+
+        customEventName: document.getElementById('customEventName'),
+        customEventStartDate: document.getElementById('customEventStartDate'),
+        customEventLocation: document.getElementById('customEventLocation'),
+        customEventOrganizer: document.getElementById('customEventOrganizer'),
+
+        customOrgLogo: document.getElementById('customOrgLogo'),
+        customOrgAddress: document.getElementById('customOrgAddress'),
+        customOrgTelephone: document.getElementById('customOrgTelephone'),
+
+        customLocalBusinessPriceRange: document.getElementById('customBizPriceRange'),
+        customLocalBusinessOpeningHours: document.getElementById('customBizOpeningHours'),
+
+        customVideoContainer: document.getElementById('customVideoContainer'),
+        customVideoName: document.getElementById('customVideoName'),
+        customVideoDescription: document.getElementById('customVideoDesc'),
+        customVideoThumbnail: document.getElementById('customVideoThumb'),
+        customVideoUrl: document.getElementById('customVideoUrl'),
+        customVideoDate: document.getElementById('customVideoDate'),
+
         customJobContainer: document.getElementById('customJobContainer'),
         customJobTitle: document.getElementById('customJobTitle'),
         customJobDatePosted: document.getElementById('customJobDatePosted'),
         customJobLocation: document.getElementById('customJobLocation'),
         customJobSalary: document.getElementById('customJobSalary'),
+
         customAppContainer: document.getElementById('customAppContainer'),
         customAppName: document.getElementById('customAppName'),
         customAppRating: document.getElementById('customAppRating'),
-        customAppCategory: document.getElementById('customAppCategory'),
         customAppPrice: document.getElementById('customAppPrice'),
-        customAppOs: document.getElementById('customAppOs'),
+        customAppCategory: document.getElementById('customAppCategory'),
+        customAppOperatingSystem: document.getElementById('customAppOs'),
+
         customCourseListContainer: document.getElementById('customCourseListContainer'),
         customCourseItemContainer: document.getElementById('customCourseItemContainer'),
         customCourseName: document.getElementById('customCourseName'),
         customCourseDescription: document.getElementById('customCourseDescription'),
         customCourseProvider: document.getElementById('customCourseProvider'),
-        customShippingRate: document.getElementById('customShippingRate'),
-        customShippingCountry: document.getElementById('customShippingCountry'),
-        customReturnDays: document.getElementById('customReturnDays'),
-        customReturnFees: document.getElementById('customReturnFees'),
     };
 
     let selectedPrimaryType = null;
 
     // ===================================================================
-    //  Utility Functions
+    //  Utility Functions (Toolbox) | (Defensive Programming)
     // ===================================================================
 
     /**
@@ -163,6 +179,66 @@
         if (hours > 0) duration += `${hours}H`;
         if (minutes > 0) duration += `${minutes}M`;
         return duration;
+    }
+
+    /**
+     * Safely extracts an absolute URL from an element or its child 'a' tag.
+     * @param {Element} el - The element to search in.
+     * @param {Document} doc - The document context for resolving the base URI.
+     * @returns {string|null} The absolute URL or null if not found or invalid.
+     */
+    function getSafeUrl(el, doc) {
+        if (!el) return null;
+
+        // Check if the element itself is the link
+        let linkTag = el.tagName === 'A' ? el : safeQuerySelector(el, 'a');
+
+        if (linkTag) {
+            const href = linkTag.getAttribute('href');
+            if (href && href.trim() !== '' && href.trim() !== '#') {
+                try {
+                    return new URL(href, doc.baseURI).href;
+                } catch (e) {
+                    console.warn('Could not construct a valid URL from href:', href, e);
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Determines if a provider name refers to a Person or an Organization.
+     * @param {string} name - The name of the provider.
+     * @returns {string} "Person" or "Organization".
+     */
+    function getProviderType(name) {
+        if (!name) return 'Organization'; // Default case
+
+        const lowerCaseName = name.toLowerCase();
+        const personKeywords = ['prof', 'dr.', 'mr.', 'mrs.', 'ms.'];
+        const orgKeywords = ['university', 'company', 'co.', 'college', 'school', 'academy', 'institute', 'inc.', 'ltd.'];
+
+        // Check for person titles first as they are strong indicators
+        if (personKeywords.some(keyword => lowerCaseName.startsWith(keyword))) {
+            return 'Person';
+        }
+
+        // Check for organization keywords
+        if (orgKeywords.some(keyword => lowerCaseName.includes(keyword))) {
+            return 'Organization';
+        }
+
+        // A simple check for a two-part or three-part name is a strong indicator of a Person.
+        // We check this AFTER checking for organization keywords.
+        const wordCount = name.trim().split(/\s+/).length;
+        if (wordCount >= 2 && wordCount <= 3) {
+            return 'Person';
+        }
+
+
+        // Default to Organization for anything else (e.g., company names)
+        return 'Organization';
     }
 
     /**
@@ -317,14 +393,13 @@
  * @returns {Array} Array of entities
  */
     function analyzeBreadcrumbEntities(doc) {
-        const itemSelector = getSelector(DOM.breadcrumbItem, DEFAULT_SELECTORS.Breadcrumb.b1_item);
+        const itemSelector = getSelector(DOM.customBreadcrumbItem, DEFAULT_SELECTORS.Breadcrumb.b1_item);
         const items = safeQuerySelectorAll(doc, itemSelector);
 
         if (items.length > 1) {
             const breadcrumbItems = items.map(item => {
-                const link = safeQuerySelector(item, 'a');
                 const name = escapeHtml(item.textContent.trim());
-                const url = link ? new URL(link.getAttribute('href'), doc.baseURI).href : null;
+                const url = getSafeUrl(item, doc);
                 return { name, url };
             }).filter(i => i.name);
 
@@ -347,9 +422,9 @@
  * @returns {Array} Array of entities
  */
     function analyzeFaqEntities(doc) {
-        const itemSelector = getSelector(DOM.faqItem, DEFAULT_SELECTORS.FAQPage.f1_faqContainer);
-        const questionSelector = getSelector(DOM.faqQuestion, DEFAULT_SELECTORS.FAQPage.f2_questionSelector);
-        const answerSelector = getSelector(DOM.faqAnswer, DEFAULT_SELECTORS.FAQPage.f3_answerSelector);
+        const itemSelector = getSelector(DOM.customFaqItem, DEFAULT_SELECTORS.FAQPage.f1_faqContainer);
+        const questionSelector = getSelector(DOM.customFaqQuestion, DEFAULT_SELECTORS.FAQPage.f2_questionSelector);
+        const answerSelector = getSelector(DOM.customFaqAnswer, DEFAULT_SELECTORS.FAQPage.f3_answerSelector);
 
         const items = safeQuerySelectorAll(doc, itemSelector);
         if (items.length === 0) return [];
@@ -384,7 +459,7 @@
         const productContainer = safeQuerySelector(doc, containerSelector);
         const scope = productContainer || doc;
 
-        const priceSelector = getSelector(DOM.productPrice, DEFAULT_SELECTORS.Product.p1_price);
+        const priceSelector = getSelector(DOM.customProductPrice, DEFAULT_SELECTORS.Product.p1_price);
         const priceEl = safeQuerySelector(scope, priceSelector);
         if (priceEl) {
             const priceText = priceEl.textContent.trim();
@@ -395,7 +470,7 @@
                     const contextualName = findClosestHeading(priceEl) || safeQuerySelector(scope, 'h2')?.textContent.trim();
                     if (contextualName) entities.push({ name: contextualName, value: contextualName, schemaProp: 'contextualName', type: 'Product' });
 
-                    const currencySelector = getSelector(DOM.productCurrency, DEFAULT_SELECTORS.Product.p2_currency);
+                    const currencySelector = getSelector(DOM.customProductCurrency, DEFAULT_SELECTORS.Product.p2_currency);
                     const currencyEl = safeQuerySelector(scope, currencySelector);
                     const inferredCurrency = currencyEl ? currencyEl.textContent.trim() : inferCurrency(priceText);
                     if (inferredCurrency) entities.push({ name: 'Currency', value: inferredCurrency, schemaProp: 'priceCurrency', type: 'Product' });
@@ -403,11 +478,11 @@
             }
         }
 
-        const skuSelector = getSelector(DOM.productSku, DEFAULT_SELECTORS.Product.p3_sku);
+        const skuSelector = getSelector(DOM.customProductSku, DEFAULT_SELECTORS.Product.p3_sku);
         const skuEl = safeQuerySelector(scope, skuSelector);
         if (skuEl) entities.push({ name: 'SKU', value: skuEl.textContent.trim(), schemaProp: 'sku', type: 'Product' });
 
-        const brandSelector = getSelector(DOM.productBrand, DEFAULT_SELECTORS.Product.p4_brand);
+        const brandSelector = getSelector(DOM.customProductBrand, DEFAULT_SELECTORS.Product.p4_brand);
         const brandEl = safeQuerySelector(scope, brandSelector);
         if (brandEl) entities.push({ name: 'Brand', value: brandEl.textContent.trim(), schemaProp: 'brand', type: 'Product' });
 
@@ -429,7 +504,7 @@
         const reviewContainer = safeQuerySelector(doc, containerSelector);
         const scope = reviewContainer || doc;
 
-        const ratingSelector = getSelector(DOM.reviewRating, DEFAULT_SELECTORS.Review.r2_ratingValue);
+        const ratingSelector = getSelector(DOM.customReviewRating, DEFAULT_SELECTORS.Review.r2_ratingValue);
         const ratingEl = safeQuerySelector(scope, ratingSelector);
 
         if (ratingEl) {
@@ -440,7 +515,7 @@
             }
         }
 
-        const itemNameSelector = getSelector(DOM.reviewItemName, DEFAULT_SELECTORS.Review.r3_itemName);
+        const itemNameSelector = getSelector(DOM.customReviewItemName, DEFAULT_SELECTORS.Review.r3_itemName);
         const itemNameEl = safeQuerySelector(scope, itemNameSelector);
         if (itemNameEl) {
             entities.push({ name: 'Reviewed Item Name', value: itemNameEl.textContent.trim(), schemaProp: 'itemName', type: 'Review' });
@@ -468,7 +543,7 @@
             entities.push({ name: 'Recipe Name', value: nameEl.textContent.trim(), schemaProp: 'name', type: 'Recipe', contextualName: true });
         }
 
-        const prepTimeSelector = getSelector(DOM.recipePrepTime, DEFAULT_SELECTORS.Recipe.c3_prepTime);
+        const prepTimeSelector = getSelector(DOM.customRecipePrepTime, DEFAULT_SELECTORS.Recipe.c3_prepTime);
         const prepTimeEl = safeQuerySelector(scope, prepTimeSelector);
         if (prepTimeEl) {
             const prepTimeText = prepTimeEl.getAttribute('content') || prepTimeEl.textContent.trim();
@@ -476,7 +551,7 @@
             entities.push({ name: 'Prep Time', value: prepTimeText, rawValue: prepTimeISO, schemaProp: 'prepTime', type: 'Recipe' });
         }
 
-        const cookTimeSelector = getSelector(DOM.recipeCookTime, DEFAULT_SELECTORS.Recipe.c4_cookTime);
+        const cookTimeSelector = getSelector(DOM.customRecipeCookTime, DEFAULT_SELECTORS.Recipe.c4_cookTime);
         const cookTimeEl = safeQuerySelector(scope, cookTimeSelector);
         if (cookTimeEl) {
             const cookTimeText = cookTimeEl.getAttribute('content') || cookTimeEl.textContent.trim();
@@ -484,7 +559,7 @@
             entities.push({ name: 'Cook Time', value: cookTimeText, rawValue: cookTimeISO, schemaProp: 'cookTime', type: 'Recipe' });
         }
 
-        const ingredientsSelector = getSelector(DOM.recipeIngredients, DEFAULT_SELECTORS.Recipe.c5_ingredients);
+        const ingredientsSelector = getSelector(DOM.customRecipeIngredients, DEFAULT_SELECTORS.Recipe.c5_ingredients);
         const ingredients = safeQuerySelectorAll(scope, ingredientsSelector);
         if (ingredients.length > 0) {
             const ingredientList = ingredients.map(li => li.textContent.trim()).filter(Boolean);
@@ -513,7 +588,7 @@
  */
     function analyzeHowToEntities(doc) {
         const entities = [];
-        const containerSelector = DEFAULT_SELECTORS.HowTo.h1_container;
+        const containerSelector = getSelector(DOM.customHowToContainer, DEFAULT_SELECTORS.HowTo.h1_container);
         const howtoContainer = safeQuerySelector(doc, containerSelector);
         if (!howtoContainer) return [];
 
@@ -525,10 +600,10 @@
             entities.push({ name: 'HowTo Name', value: nameEl.textContent.trim(), schemaProp: 'name', type: 'HowTo', contextualName: true });
         }
 
-        const stepSelector = getSelector(DOM.howToStep, DEFAULT_SELECTORS.HowTo.h3_stepContainer);
+        const stepSelector = getSelector(DOM.customHowToStep, DEFAULT_SELECTORS.HowTo.h3_stepContainer);
         const steps = safeQuerySelectorAll(scope, stepSelector);
         if (steps.length > 0) {
-            const textSelector = getSelector(DOM.howToText, DEFAULT_SELECTORS.HowTo.h4_stepText);
+            const textSelector = getSelector(DOM.customHowToText, DEFAULT_SELECTORS.HowTo.h4_stepText);
             const stepData = steps.map(step => ({
                 "@type": "HowToStep",
                 "text": safeQuerySelector(step, textSelector)?.textContent.trim()
@@ -558,7 +633,7 @@
         const container = safeQuerySelector(doc, containerSelector);
         const scope = container || doc;
 
-        const startDateSelector = getSelector(DOM.eventStartDate, DEFAULT_SELECTORS.Event.e2_startDate);
+        const startDateSelector = getSelector(DOM.customEventStartDate, DEFAULT_SELECTORS.Event.e2_startDate);
         const startDateEl = safeQuerySelector(scope, startDateSelector);
 
         // Use the start date as the primary trigger for an event.
@@ -573,11 +648,11 @@
                 entities.push({ name: 'Event Name', value: nameEl.textContent.trim(), schemaProp: 'name', type: 'Event' });
             }
 
-            const locationSelector = getSelector(DOM.eventLocation, DEFAULT_SELECTORS.Event.e3_location);
+            const locationSelector = getSelector(DOM.customEventLocation, DEFAULT_SELECTORS.Event.e3_location);
             const locationEl = safeQuerySelector(scope, locationSelector);
             if (locationEl) entities.push({ name: 'Event Location', value: locationEl.textContent.trim(), schemaProp: 'location', type: 'Event' });
 
-            const organizerSelector = getSelector(DOM.eventOrganizer, DEFAULT_SELECTORS.Event.e4_organizer);
+            const organizerSelector = getSelector(DOM.customEventOrganizer, DEFAULT_SELECTORS.Event.e4_organizer);
             const organizerEl = safeQuerySelector(scope, organizerSelector);
             if (organizerEl) entities.push({ name: 'Event Organizer', value: organizerEl.textContent.trim(), schemaProp: 'organizer', type: 'Event' });
         }
@@ -594,9 +669,9 @@
         const entities = [];
         const scope = doc; // Organization info is typically global (header/footer)
 
-        const logoSelector = getSelector(DOM.orgLogo, DEFAULT_SELECTORS.Organization.o1_logo);
-        const addressSelector = getSelector(DOM.orgAddress, DEFAULT_SELECTORS.Organization.o2_address);
-        const telephoneSelector = getSelector(DOM.orgTelephone, DEFAULT_SELECTORS.Organization.o3_telephone);
+        const logoSelector = getSelector(DOM.customOrgLogo, DEFAULT_SELECTORS.Organization.o1_logo);
+        const addressSelector = getSelector(DOM.customOrgAddress, DEFAULT_SELECTORS.Organization.o2_address);
+        const telephoneSelector = getSelector(DOM.customOrgTelephone, DEFAULT_SELECTORS.Organization.o3_telephone);
 
         const logoEl = safeQuerySelector(scope, logoSelector);
         if (logoEl) {
@@ -639,17 +714,17 @@
         const container = safeQuerySelector(doc, containerSelector);
         const scope = container || doc;
 
-        const thumbSelector = getSelector(DOM.videoThumb, DEFAULT_SELECTORS.VideoObject.v4_thumbnail);
-        const urlSelector = getSelector(DOM.videoUrl, DEFAULT_SELECTORS.VideoObject.v5_contentUrl);
+        const thumbSelector = getSelector(DOM.customVideoThumbnail, DEFAULT_SELECTORS.VideoObject.v4_thumbnail);
+        const urlSelector = getSelector(DOM.customVideoUrl, DEFAULT_SELECTORS.VideoObject.v5_contentUrl);
 
         const thumbEl = safeQuerySelector(scope, thumbSelector);
         const urlEl = safeQuerySelector(scope, urlSelector);
 
         // Only proceed if we find strong evidence of a video (thumbnail or URL).
         if (thumbEl || urlEl) {
-            const nameSelector = getSelector(DOM.videoName, DEFAULT_SELECTORS.VideoObject.v2_name);
-            const descSelector = getSelector(DOM.videoDesc, DEFAULT_SELECTORS.VideoObject.v3_description);
-            const dateSelector = getSelector(DOM.videoDate, DEFAULT_SELECTORS.VideoObject.v6_uploadDate);
+            const nameSelector = getSelector(DOM.customVideoName, DEFAULT_SELECTORS.VideoObject.v2_name);
+            const descSelector = getSelector(DOM.customVideoDescription, DEFAULT_SELECTORS.VideoObject.v3_description);
+            const dateSelector = getSelector(DOM.customVideoDate, DEFAULT_SELECTORS.VideoObject.v6_uploadDate);
 
             const nameEl = safeQuerySelector(scope, nameSelector);
             if (nameEl) entities.push({ name: 'Video Title', value: nameEl.textContent.trim(), schemaProp: 'name', type: 'VideoObject' });
@@ -693,8 +768,8 @@
         const entities = [];
         const scope = doc; // Local business info is often global (e.g., in the footer)
 
-        const priceRangeSelector = getSelector(DOM.customBizPriceRange, DEFAULT_SELECTORS.LocalBusiness.l1_priceRange);
-        const openingHoursSelector = getSelector(DOM.customBizOpeningHours, DEFAULT_SELECTORS.LocalBusiness.l2_openingHours);
+        const priceRangeSelector = getSelector(DOM.customLocalBusinessPriceRange, DEFAULT_SELECTORS.LocalBusiness.l1_priceRange);
+        const openingHoursSelector = getSelector(DOM.customLocalBusinessOpeningHours, DEFAULT_SELECTORS.LocalBusiness.l2_openingHours);
 
         const priceRangeEl = safeQuerySelector(scope, priceRangeSelector);
         if (priceRangeEl) {
@@ -774,7 +849,7 @@
             const categoryEl = safeQuerySelector(scope, categorySelector);
             if (categoryEl) entities.push({ name: 'App Category', value: categoryEl.textContent.trim(), schemaProp: 'applicationCategory', type: 'SoftwareApplication' });
 
-            const osSelector = getSelector(DOM.customAppOs, DEFAULT_SELECTORS.SoftwareApplication.s5_os);
+            const osSelector = getSelector(DOM.customAppOperatingSystem, DEFAULT_SELECTORS.SoftwareApplication.s5_os);
             const osEl = safeQuerySelector(scope, osSelector);
             if (osEl) entities.push({ name: 'Operating System', value: osEl.textContent.trim(), schemaProp: 'operatingSystem', type: 'SoftwareApplication' });
 
@@ -822,11 +897,25 @@
             const providerEl = safeQuerySelector(item, providerSelector);
             const descriptionEl = safeQuerySelector(item, descriptionSelector);
 
+            // Extract provider URL first, as it's more specific.
+            const providerUrl = getSafeUrl(providerEl, doc);
+
+            // Extract the main item URL.
+            let courseUrl = getSafeUrl(item, doc);
+
+            // If the main URL is the same as the provider's, it's not a distinct course URL.
+            if (courseUrl && courseUrl === providerUrl) {
+                courseUrl = null;
+            }
+
+
             if (nameEl && providerEl && descriptionEl) {
                 const courseData = {
                     name: nameEl.textContent.trim(),
                     provider: providerEl.textContent.trim(),
-                    description: descriptionEl.textContent.trim()
+                    description: descriptionEl.textContent.trim(),
+                    url: courseUrl,
+                    providerUrl: providerUrl
                 };
                 entities.push({
                     name: 'Course Found',
@@ -1433,8 +1522,8 @@
             offer.priceValidUntil = date.toISOString().split('T')[0];
 
 
-            const shippingRateValue = DOM.customShippingRate?.value.trim();
-            const shippingCountryValue = DOM.customShippingCountry?.value.trim() || "US";
+            const shippingRateValue = DOM.shippingRate?.value.trim();
+            const shippingCountryValue = DOM.shippingCountry?.value.trim() || "US";
 
             if (shippingRateValue) {
                 offer.shippingDetails = {
@@ -1494,8 +1583,8 @@
                 };
             }
 
-            const returnDaysValue = DOM.customReturnDays?.value.trim();
-            const returnFeesValue = DOM.customReturnFees?.value.trim();
+            const returnDaysValue = DOM.returnDays?.value.trim();
+            const returnFeesValue = DOM.returnFees?.value.trim();
 
             if (returnDaysValue) {
                 offer.hasMerchantReturnPolicy = {
@@ -1803,18 +1892,28 @@
 
         schema.itemListElement = courseEntities.map((entity, index) => {
             const course = entity.rawValue;
+            const providerType = getProviderType(course.provider);
+            const provider = {
+                "@type": providerType,
+                "name": course.provider
+            };
+
+            if (course.providerUrl) {
+                provider.sameAs = course.providerUrl;
+            }
+
+            const courseItem = {
+                "@type": "Course",
+                "url": course.url,
+                "name": course.name,
+                "description": course.description,
+                "provider": provider
+            };
+
             return {
                 "@type": "ListItem",
                 "position": index + 1,
-                "item": {
-                    "@type": "Course",
-                    "name": course.name,
-                    "description": course.description,
-                    "provider": {
-                        "@type": "Organization",
-                        "name": course.provider
-                    }
-                }
+                "item": courseItem
             };
         });
 
@@ -2529,9 +2628,50 @@
         }
     });
 
-    // Initialize external modules if available
-    if (typeof initializeProjectHub !== 'undefined') initializeProjectHub();
-    if (typeof initializeEmp !== 'undefined') initializeEmp();
+    /**
+     * Initializes all Bootstrap tooltips with an optimal balance of UX, Accessibility, and Security.
+     *
+     * This function enhances the default Bootstrap tooltip behavior by:
+     * 1.  Allowing HTML content for richer, more informative tooltips.
+     * 2.  Setting triggers to 'hover focus' to ensure accessibility for both mouse and keyboard users.
+     * 3.  Adding a slight delay for a smoother, less intrusive user experience.
+     * 4.  Implementing a pragmatic security check. Given that all tooltip content is currently
+     *     static and developer-controlled, a full sanitization library is considered over-engineering.
+     *     Instead, a robust regex-based check is used as a strong safeguard against accidental
+     *     introduction of common script injection vectors in the future.
+     */
+    function initializeEnhancedTooltips() {
+        try {
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+            if (tooltipTriggerList.length === 0) return; // Early return if no tooltips
+
+            tooltipTriggerList.forEach(tooltipTriggerEl => {
+                const title = tooltipTriggerEl.getAttribute('title') || tooltipTriggerEl.getAttribute('data-bs-title');
+
+                // Proceed only if there is content for the tooltip.
+                if (title) {
+                    // Pragmatic Security Check: A regex to block obvious script injection attempts.
+                    // This is a middle-ground solution that avoids an external library for this controlled context.
+                    // It looks for "<script>", "javascript:", and "on..." event handlers.
+                    const isPotentiallyUnsafe = /<script|javascript:|on\w+\s*=/i.test(title);
+
+                    if (!isPotentiallyUnsafe) {
+                        new bootstrap.Tooltip(tooltipTriggerEl, {
+                            html: true,
+                            trigger: 'hover focus',
+                            delay: { show: 300, hide: 100 },
+                            boundary: 'viewport'
+                        });
+                    } else {
+                        // Log a warning for the developer if potentially unsafe content is found.
+                        console.warn('Tooltip initialization skipped due to potentially unsafe content:', tooltipTriggerEl);
+                    }
+                }
+            });
+        } catch (error) {
+            console.error("A critical error occurred while initializing tooltips:", error);
+        }
+    }
 
     // --- >> DEVTOOLS EXTENSION INTEGRATION V2 (ROBUST & SECURE) << ---
     /**
@@ -2568,10 +2708,14 @@
         });
     }
 
-   // Initialize Bootstrap Tooltips for enhanced UX
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+    // 1. Initialize UI components
+    initializeEnhancedTooltips();
 
-    // Activate the listener
+    // 2. Initialize external modules if available
+    if (typeof initializeProjectHub !== 'undefined') initializeProjectHub();
+    if (typeof initializeEmp !== 'undefined') initializeEmp();
+
+    // 3. Activate listeners
     listenForDevTools();
+
 })();
