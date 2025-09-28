@@ -72,3 +72,44 @@
 .tooltip .tooltip-arrow::before {
   border-top-color: #1e1e2f;
 }
+
+/* *
+ * ===================================================================
+ *  Enhanced Form Control UX
+ * =================================================================== */
+
+/* * Custom placeholder styling for better visual hierarchy.
+ * We make the placeholder text fainter than Bootstrap's default (which is opacity: 0.5)
+ * to create a clearer distinction between placeholder hints and user-entered text.
+ * We use Bootstrap's CSS variable for color to ensure it adapts to theme changes (e.g., light/dark mode). */
+
+:root {
+  --placeholder-color: var(--bs-secondary-color);
+  --placeholder-opacity: 0.4;
+}
+
+/* Placeholder Styling */
+
+.form-control::placeholder {
+  color: var(--placeholder-color);
+  opacity: var(--placeholder-opacity);
+}
+
+.form-control::-webkit-input-placeholder {
+  color: var(--placeholder-color);
+  opacity: var(--placeholder-opacity);
+}
+
+.form-control::-moz-placeholder {
+  color: var(--placeholder-color);
+  opacity: var(--placeholder-opacity);
+}
+
+/* Optional: drop IE rule unless legacy support is critical */
+
+/* Ensure user text remains solid */
+
+.form-control {
+  color: var(--bs-body-color);
+  opacity: 1;
+}
