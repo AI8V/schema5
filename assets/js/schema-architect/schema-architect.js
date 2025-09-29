@@ -217,7 +217,7 @@
 
         const lowerCaseName = name.toLowerCase();
         const personKeywords = ['prof', 'dr.', 'mr.', 'mrs.', 'ms.'];
-        const orgKeywords = ['university', 'company', 'co.', 'college', 'school', 'academy', 'institute', 'inc.', 'ltd.'];
+        const orgKeywords = ['university', 'company', 'Team', 'co.', 'college', 'school', 'academy', 'institute', 'inc.', 'ltd.'];
 
         // Check for person titles first as they are strong indicators
         if (personKeywords.some(keyword => lowerCaseName.startsWith(keyword))) {
