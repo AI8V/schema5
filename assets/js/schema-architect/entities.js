@@ -68,7 +68,7 @@ const initializeEmp = (function() {
 
             const label = document.createElement('label');
             label.className = 'input-group-text';
-            label.style.width = '250px';
+            label.style.width = '300px';
             label.textContent = labelText;
 
             const input = document.createElement('input');
