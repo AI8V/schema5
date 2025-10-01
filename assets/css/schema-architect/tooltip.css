@@ -1,0 +1,16 @@
+/* لون خلفية التولتيب */
+
+.tooltip .tooltip-inner {
+  background-color: #1e1e2f;
+  color: #e0d8c4;
+  font-size: 16px;
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+
+/* لون السهم */
+
+.tooltip .tooltip-arrow::before {
+  border-top-color: #1e1e2f;
+}
+
