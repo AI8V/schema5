@@ -834,35 +834,14 @@
     }
 
     /**
-     * [HELPER] Extracts all product images with advanced logic.
-     * @param {Element} scope - The DOM scope to search within.
-     * @param {Document} doc - The document object.
-     * @returns {Array} An array containing a single image entity (with rawValue as an array of URLs).
+     * [SUB-HELPER] Creates a URL adding function with priority and ordering.
      */
-    function _extractProductImages(scope, doc) {
-        const collected = [];
+    function _createImageUrlAdder(collected, doc) {
         let orderCounter = 0;
-        const imageSelector = getSelector(DOM.customProductImageSelector, DEFAULT_SELECTORS.Product.p_image);
-        let candidates = [];
-        const userSel = (DOM.customProductImageSelector && DOM.customProductImageSelector.value.trim()) || null;
-
-        if (userSel) {
-            candidates = Array.from(safeQuerySelectorAll(scope, userSel));
-            if (candidates.length > 0 && candidates[0].tagName && !['IMG', 'PICTURE', 'SOURCE'].includes(candidates[0].tagName.toUpperCase())) {
-                const imgsFromContainers = [];
-                candidates.forEach(c => imgsFromContainers.push(...Array.from(safeQuerySelectorAll(c, 'img'))));
-                if (imgsFromContainers.length > 0) candidates = imgsFromContainers;
-            }
-        }
-        if (!candidates || candidates.length === 0) {
-            candidates = Array.from(safeQuerySelectorAll(scope, DEFAULT_SELECTORS.Product.p_image));
-        }
-
-        function tryAddUrl(rawUrl, priority) {
+        return (rawUrl, priority) => {
             if (!rawUrl) return;
             try {
-                const parts = rawUrl.split(',').map(p => p.trim()).filter(Boolean);
-                parts.forEach(part => {
+                rawUrl.split(',').map(p => p.trim()).filter(Boolean).forEach(part => {
                     const urlToken = part.split(/\s+/)[0];
                     if (urlToken) {
                         const abs = new URL(urlToken, doc.baseURI).href;
@@ -870,61 +849,85 @@
                     }
                 });
             } catch (e) { /* ignore invalid URL */ }
-        }
+        };
+    }
 
-        const processedPictures = new WeakSet();
-        candidates.forEach(candidate => {
-            try {
-                if (!candidate || !candidate.tagName) return;
-                const tag = candidate.tagName.toUpperCase();
+    /**
+     * [SUB-HELPER] Processes a single image DOM element candidate.
+     */
+    function _processImageCandidate(candidate, tryAddUrl, processedPictures) {
+        try {
+            if (!candidate?.tagName) return;
+            const tag = candidate.tagName.toUpperCase();
 
-                if (tag === 'IMG') {
-                    const picture = candidate.closest ? candidate.closest('picture') : null;
-                    if (picture && !processedPictures.has(picture)) {
-                        processedPictures.add(picture);
-                        const mainImgSrc = candidate.getAttribute('src') || candidate.getAttribute('data-src') || candidate.getAttribute('data-lazy-src') || candidate.getAttribute('data-srcset') || candidate.getAttribute('data-original');
-                        if (mainImgSrc && !mainImgSrc.startsWith('data:image')) tryAddUrl(mainImgSrc, 1);
-                        const imgSrcset = candidate.getAttribute('srcset') || candidate.getAttribute('data-srcset');
-                        if (imgSrcset) tryAddUrl(imgSrcset, 2);
-                        Array.from(picture.querySelectorAll('source[srcset]')).forEach(srcEl => tryAddUrl(srcEl.getAttribute('srcset'), 2));
-                    } else if (!picture) {
-                        const mainSrc = candidate.getAttribute('src') || candidate.getAttribute('data-src') || candidate.getAttribute('data-lazy-src') || candidate.getAttribute('data-original');
-                        if (mainSrc && !mainSrc.startsWith('data:image')) tryAddUrl(mainSrc, 3);
-                        const srcset = candidate.getAttribute('srcset') || candidate.getAttribute('data-srcset');
-                        if (srcset) tryAddUrl(srcset, 3);
-                    }
-                } else if (candidate.querySelectorAll) {
-                    const imgsInside = Array.from(candidate.querySelectorAll('img'));
-                    if (imgsInside.length > 0) {
-                        imgsInside.forEach(imgEl => {
-                             const main = imgEl.getAttribute('src') || imgEl.getAttribute('data-src') || imgEl.getAttribute('data-lazy-src') || imgEl.getAttribute('data-original');
-                             if (main && !main.startsWith('data:image')) tryAddUrl(main, 3);
-                        });
-                    }
+            if (tag === 'IMG') {
+                const picture = candidate.closest('picture');
+                if (picture && !processedPictures.has(picture)) {
+                    processedPictures.add(picture);
+                    const mainImgSrc = candidate.getAttribute('src') || candidate.getAttribute('data-src') || candidate.getAttribute('data-lazy-src') || candidate.getAttribute('data-srcset') || candidate.getAttribute('data-original');
+                    if (mainImgSrc && !mainImgSrc.startsWith('data:image')) tryAddUrl(mainImgSrc, 1);
+                    const imgSrcset = candidate.getAttribute('srcset') || candidate.getAttribute('data-srcset');
+                    if (imgSrcset) tryAddUrl(imgSrcset, 2);
+                    Array.from(picture.querySelectorAll('source[srcset]')).forEach(srcEl => tryAddUrl(srcEl.getAttribute('srcset'), 2));
+                } else if (!picture) {
+                    const mainSrc = candidate.getAttribute('src') || candidate.getAttribute('data-src') || candidate.getAttribute('data-lazy-src') || candidate.getAttribute('data-original');
+                    if (mainSrc && !mainSrc.startsWith('data:image')) tryAddUrl(mainSrc, 3);
+                    const srcset = candidate.getAttribute('srcset') || candidate.getAttribute('data-srcset');
+                    if (srcset) tryAddUrl(srcset, 3);
                 }
-            } catch (err) { console.warn('Image candidate processing error:', err); }
-        });
-
-        if (collected.length === 0) {
-             const fallbackImg = safeQuerySelector(scope, 'img');
-             if (fallbackImg) {
-                 const fsrc = fallbackImg.getAttribute('src') || fallbackImg.getAttribute('data-src');
-                 if (fsrc && !fsrc.startsWith('data:image')) tryAddUrl(fsrc, 3);
-             }
+            } else if (candidate.querySelectorAll) { // It's a container
+                Array.from(candidate.querySelectorAll('img')).forEach(imgEl => {
+                    const main = imgEl.getAttribute('src') || imgEl.getAttribute('data-src') || imgEl.getAttribute('data-lazy-src') || imgEl.getAttribute('data-original');
+                    if (main && !main.startsWith('data:image')) tryAddUrl(main, 3);
+                });
+            }
+        } catch (err) {
+            console.warn('[_extractProductImages] Image processing error:', { element: candidate?.tagName, error: err.message });
         }
+    }
 
-        const map = new Map();
-        collected.sort((a, b) => a.priority - b.priority || a.order - b.order).forEach(item => {
-            if (!map.has(item.url)) map.set(item.url, item);
-        });
-        const finalImageUrls = Array.from(map.keys());
-
-        if (finalImageUrls.length === 0) {
-            const og = doc.querySelector('meta[property="og:image"], meta[name="og:image"]');
-            if (og && og.content) {
-                try { finalImageUrls.push(new URL(og.content, doc.baseURI).href); } catch (e) { /* ignore */ }
+    /**
+     * [SUB-HELPER] Gets candidate image elements from the DOM.
+     */
+    function _getImageCandidates(scope, userSelector) {
+        let candidates = [];
+        if (userSelector) {
+            candidates = Array.from(safeQuerySelectorAll(scope, userSelector));
+            if (candidates[0]?.tagName && !['IMG', 'PICTURE', 'SOURCE'].includes(candidates[0].tagName.toUpperCase())) {
+                candidates = candidates.flatMap(c => Array.from(safeQuerySelectorAll(c, 'img')));
             }
         }
+        if (candidates.length === 0) {
+            candidates = Array.from(safeQuerySelectorAll(scope, DEFAULT_SELECTORS.Product.p_image));
+        }
+        return candidates;
+    }
+
+    /**
+     * [SUB-HELPER] Adds a final fallback image if no other images were found.
+     */
+    function _addFallbackImage(scope, doc, tryAddUrl) {
+        const fallbackImg = safeQuerySelector(scope, 'img');
+        if (fallbackImg) {
+            const fsrc = fallbackImg.getAttribute('src') || fallbackImg.getAttribute('data-src');
+            if (fsrc && !fsrc.startsWith('data:image')) tryAddUrl(fsrc, 4);
+        } else {
+             const og = doc.querySelector('meta[property="og:image"], meta[name="og:image"]');
+             if (og?.content) {
+                 tryAddUrl(og.content, 5);
+             }
+        }
+    }
+
+    /**
+     * [SUB-HELPER] Finalizes the list of image URLs and builds the schema entity.
+     */
+    function _buildImageEntity(collected, doc) {
+        const map = new Map();
+        collected.sort((a, b) => a.priority - b.priority || a.order - b.order)
+                 .forEach(item => { if (!map.has(item.url)) map.set(item.url, item); });
+
+        const finalImageUrls = Array.from(map.keys());
 
         if (finalImageUrls.length > 0) {
             return [{
@@ -936,6 +939,30 @@
             }];
         }
         return [];
+    }
+
+    /**
+     * [HELPER] Extracts all product images using a modular, multi-stage process.
+     * @param {Element} scope - The DOM scope to search within.
+     * @param {Document} doc - The document object.
+     * @returns {Array} An array containing a single image entity (with rawValue as an array of URLs).
+     */
+    function _extractProductImages(scope, doc) {
+        const collected = [];
+        const userSelector = DOM.customProductImageSelector?.value?.trim();
+        const candidates = _getImageCandidates(scope, userSelector);
+        const tryAddUrl = _createImageUrlAdder(collected, doc);
+        const processedPictures = new WeakSet();
+
+        candidates.forEach(candidate => {
+            _processImageCandidate(candidate, tryAddUrl, processedPictures);
+        });
+
+        if (collected.length === 0) {
+            _addFallbackImage(scope, doc, tryAddUrl);
+        }
+
+        return _buildImageEntity(collected, doc);
     }
 
     /**
@@ -3079,6 +3106,420 @@ function parseUnstructuredAddress(addressString) {
     }
 
     /**
+     * Populates product properties by dispatching to specialized helper functions.
+     * @param {Object} schema - The schema object to populate.
+     * @param {Array} entities - The array of all discovered entities from the page.
+     * @param {boolean} isPrimary - A flag indicating if this is the primary schema entity.
+     */
+    function populateProductProperties(schema, entities, isPrimary) {
+        const productEntities = entities.filter(e => e.type === 'Product');
+        const findProductEntity = (prop) => productEntities.find(e => e.schemaProp === prop);
+
+        // 1. GATHER ALL DOM-related state ONCE.
+        const hasVariants = DOM.productHasVariantsSwitch.checked;
+        const productGroupId = DOM.productGroupId.value.trim();
+        const customCurrencyValue = DOM.customProductCurrency?.value?.trim();
+        const manualImageUrls = DOM.customProductImageOverride?.value?.trim();
+        const manualDescription = DOM.customProductDescriptionOverride?.value?.trim();
+        const memberPriceRows = document.querySelectorAll('#memberPricingContainer .member-price-row');
+        const variantRows = document.querySelectorAll('#variantsContainer .variant-row');
+        const variesBy = Array.from(DOM.variesByCheckboxes).filter(cb => cb.checked).map(cb => cb.value);
+        const baseUrl = DOM.urlInput.value.trim() || DOM.baseUrlInput.value.trim();
+
+        // 2. VALIDATE state.
+        let effectiveHasVariants = hasVariants;
+        if (effectiveHasVariants && !productGroupId) {
+            showToast('Product Group ID is required for variant products.', 'danger');
+            effectiveHasVariants = false; // Force single product mode if group ID is missing
+        }
+
+        // 3. DISPATCH to pure functions with the gathered state.
+        if (effectiveHasVariants) {
+            const groupConfig = { productGroupId, variesBy, memberPriceRows, variantRows, baseUrl };
+            _populateProductGroup(schema, entities, productEntities, findProductEntity, groupConfig, customCurrencyValue);
+        } else {
+            const singleConfig = { manualImageUrls, manualDescription, memberPriceRows };
+            _populateSingleProduct(schema, entities, productEntities, findProductEntity, singleConfig, customCurrencyValue);
+        }
+
+        // Final cleanup of the main schema object
+        Object.keys(schema).forEach(key => (schema[key] === undefined || schema[key] === null) && delete schema[key]);
+    }
+
+    /**
+     * [HELPER] Populates the schema object for a single product.
+     * @param {Object} schema - The schema object to populate.
+     * @param {Array} entities - All discovered entities.
+     * @param {Array} productEntities - Product-specific entities.
+     * @param {Function} findProductEntity - Helper to find a specific product entity.
+     * @param {Object} config - Configuration object with DOM-derived values.
+     * @param {string} config.manualImageUrls - Comma-separated string of manual image URLs.
+     * @param {string} config.manualDescription - Manual description override.
+     * @param {NodeListOf<Element>} config.memberPriceRows - A NodeList of member price row elements.
+     * @param {string} customCurrencyValue - The value from the custom currency input.
+     */
+    function _populateSingleProduct(schema, entities, productEntities, findProductEntity, config, customCurrencyValue) {
+        schema.name = findProductEntity('contextualName')?.value || entities.find(e => e.schemaProp === 'name')?.value;
+
+        let finalImageUrls = [];
+        if (config.manualImageUrls) {
+            finalImageUrls = config.manualImageUrls.split(',').map(url => url.trim()).filter(Boolean);
+        }
+        if (finalImageUrls.length === 0) {
+            const imageEntity = findProductEntity('image');
+            if (imageEntity) {
+                if (imageEntity.rawValue && Array.isArray(imageEntity.rawValue)) {
+                    finalImageUrls = imageEntity.rawValue;
+                } else if (imageEntity.value) {
+                    finalImageUrls = imageEntity.value.split(',').map(url => url.trim()).filter(Boolean);
+                }
+            }
+        }
+        if (finalImageUrls.length === 0) {
+            const ogImageEntity = entities.find(e => e.schemaProp === 'image' && !e.type);
+            if (ogImageEntity && ogImageEntity.value) {
+                finalImageUrls.push(ogImageEntity.value);
+            }
+        }
+        if (finalImageUrls.length > 1) {
+            schema.image = finalImageUrls;
+        } else if (finalImageUrls.length === 1) {
+            schema.image = finalImageUrls[0];
+        }
+
+        let finalDescription = null;
+        if (config.manualDescription) {
+            finalDescription = config.manualDescription;
+        }
+        if (!finalDescription) {
+            const descriptionEntity = findProductEntity('description');
+            if (descriptionEntity) {
+                finalDescription = descriptionEntity.value;
+            }
+        }
+        if (finalDescription) {
+            schema.description = finalDescription;
+        }
+
+        schema.brand = findProductEntity('brand') ? { "@type": "Brand", "name": findProductEntity('brand').value } : null;
+        schema.sku = findProductEntity('sku')?.value;
+        schema.gtin = findProductEntity('gtin')?.value;
+        schema.mpn = findProductEntity('mpn')?.value;
+        schema.color = findProductEntity('color')?.value;
+        schema.material = findProductEntity('material')?.value;
+        schema.pattern = findProductEntity('pattern')?.value;
+        schema.audience = buildAudienceObject(findProductEntity);
+
+        const sizeValue = findProductEntity('size')?.value;
+        if (sizeValue) {
+            const sizeSystem = findProductEntity('sizeSystem')?.value;
+            const sizeGroup = findProductEntity('sizeGroup')?.value;
+            if (sizeSystem || sizeGroup) {
+                schema.size = { "@type": "SizeSpecification", "name": sizeValue };
+                if (sizeSystem) { schema.size.sizeSystem = `https://schema.org/WearableSizeSystem${sizeSystem}`; }
+                if (sizeGroup) { schema.size.sizeGroup = `https://schema.org/WearableSizeGroup${sizeGroup}`; }
+            } else {
+                schema.size = sizeValue;
+            }
+        }
+
+        schema.offers = _buildSingleProductOffer(productEntities, findProductEntity, { memberPriceRows: config.memberPriceRows, customCurrencyValue });
+        schema.aggregateRating = _buildAggregateRating(entities);
+    }
+
+     /**
+     * [HELPER] Populates the schema object for a product group with variants.
+     * @param {Object} schema - The schema object to populate.
+     * @param {Array} entities - All discovered entities.
+     * @param {Array} productEntities - Product-specific entities.
+     * @param {Function} findProductEntity - Helper to find a specific product entity.
+     * @param {Object} config - Configuration object with DOM-derived values.
+     * @param {string} customCurrencyValue - The value from the custom currency input.
+     */
+    function _populateProductGroup(schema, entities, productEntities, findProductEntity, config, customCurrencyValue) {
+        const groupId = config.productGroupId;
+        schema['@type'] = 'ProductGroup';
+        schema.productGroupID = groupId;
+        schema['@id'] = `#${groupId}`;
+
+        if (config.variesBy.length > 0) { schema.variesBy = config.variesBy; }
+
+        const inheritable = {
+            brand: findProductEntity('brand') ? { "@type": "Brand", "name": findProductEntity('brand').value } : null,
+            image: (() => {
+                const imgEntity = findProductEntity('image');
+                if (!imgEntity) return null;
+                if (imgEntity.rawValue && Array.isArray(imgEntity.rawValue)) {
+                    return imgEntity.rawValue.length > 1 ? imgEntity.rawValue : imgEntity.rawValue[0];
+                }
+                if (imgEntity.value) {
+                    const urls = imgEntity.value.split(',').map(u => u.trim()).filter(Boolean);
+                    return urls.length > 1 ? urls : urls[0];
+                }
+                return null;
+            })(),
+            description: findProductEntity('description')?.value,
+            material: findProductEntity('material')?.value,
+            pattern: findProductEntity('pattern')?.value,
+            gtin: findProductEntity('gtin')?.value,
+            mpn: findProductEntity('mpn')?.value,
+            audience: buildAudienceObject(findProductEntity)
+        };
+        Object.keys(inheritable).forEach(key => (inheritable[key] === undefined || inheritable[key] === null) && delete inheritable[key]);
+
+        schema.name = findProductEntity('contextualName')?.value || entities.find(e => e.schemaProp === 'name')?.value;
+        Object.assign(schema, inheritable);
+
+        const finalCurrency = _determineFinalCurrency(findProductEntity, customCurrencyValue);
+
+        const masterOfferDetails = {
+            priceCurrency: finalCurrency,
+            priceSpecifications: []
+        };
+        const validUntilDate = findProductEntity('priceValidUntil')?.value;
+        if (validUntilDate) {
+            try {
+                masterOfferDetails.priceValidUntil = new Date(validUntilDate).toISOString().split('T')[0];
+            } catch (e) { /* ignore */ }
+        }
+        const strikethroughPrice = findProductEntity('strikethroughPrice')?.value;
+        if (strikethroughPrice) {
+            masterOfferDetails.priceSpecifications.push({
+                "@type": "UnitPriceSpecification", "priceType": "https://schema.org/StrikethroughPrice",
+                "price": strikethroughPrice, "priceCurrency": masterOfferDetails.priceCurrency
+            });
+        }
+        config.memberPriceRows.forEach(row => {
+            const tierId = row.querySelector('.member-tier-select').value;
+            const priceInput = row.querySelector('.member-price-input');
+            const priceValue = priceInput.value.trim();
+            if (tierId && priceValue) {
+                const price = parseFloat(priceValue);
+                if (isNaN(price) || price < 0) {
+                    priceInput.classList.add('is-invalid');
+                    showToast(`Invalid member price: "${priceValue}"`, 'warning');
+                    return;
+                }
+                priceInput.classList.remove('is-invalid');
+                masterOfferDetails.priceSpecifications.push({
+                    "@type": "UnitPriceSpecification", "price": price.toString(), "priceCurrency": masterOfferDetails.priceCurrency,
+                    "validForMemberTier": { "@type": "MemberProgramTier", "@id": tierId }
+                });
+            }
+        });
+        const tempOfferForLogistics = { priceCurrency: masterOfferDetails.priceCurrency };
+        buildShippingDetails(tempOfferForLogistics, findProductEntity);
+        buildReturnPolicy(tempOfferForLogistics, findProductEntity);
+        masterOfferDetails.shippingDetails = tempOfferForLogistics.shippingDetails;
+        masterOfferDetails.hasMerchantReturnPolicy = tempOfferForLogistics.hasMerchantReturnPolicy;
+
+        const seenSkus = new Set();
+        const variants = Array.from(config.variantRows).map(row =>
+            _buildVariantFromRow(row, inheritable, masterOfferDetails, groupId, seenSkus, config.baseUrl)
+        );
+
+        const hasDuplicateSkus = Array.from(document.querySelectorAll('#variantsContainer .variant-sku.is-invalid')).length > 0;
+        if (hasDuplicateSkus) {
+            showToast('Duplicate SKUs detected. Each variant must have a unique SKU.', 'warning');
+        }
+
+        if (variants.length > 0) {
+            schema.hasVariant = variants.filter(Boolean); // Filter out nulls if any validation fails
+        }
+    }
+
+    /**
+     * [HELPER] Builds a single variant Product object from a DOM row.
+     * @param {HTMLElement} row - The DOM element for the variant row.
+     * @param {Object} inheritable - An object of properties to inherit from the ProductGroup.
+     * @param {Object} masterOfferDetails - Common offer details.
+     * @param {string} groupId - The productGroupID for the parent.
+     * @param {Set<string>} seenSkus - A Set to track SKU uniqueness.
+     * @param {string} baseUrl - The base URL of the page.
+     * @returns {Object|null} The constructed variant Product object or null if invalid.
+     */
+    function _buildVariantFromRow(row, inheritable, masterOfferDetails, groupId, seenSkus, baseUrl) {
+        const variant = { "@type": "Product", ...inheritable, "isVariantOf": { "@id": `#${groupId}` } };
+
+        const variantImageUrl = row.querySelector('.variant-image')?.value.trim();
+        if (variantImageUrl) { variant.image = variantImageUrl; }
+
+        const skuInput = row.querySelector('.variant-sku');
+        const sku = skuInput?.value.trim();
+        if (sku) {
+            if (seenSkus.has(sku)) {
+                skuInput.classList.add('is-invalid');
+            } else {
+                skuInput.classList.remove('is-invalid');
+                seenSkus.add(sku);
+                variant.sku = sku;
+            }
+        }
+
+        const name = row.querySelector('.variant-name')?.value.trim();
+        if (name) { variant.name = name; }
+
+        row.querySelectorAll('.variant-prop').forEach(propInput => {
+            const propName = propInput.dataset.propName;
+            const propValue = propInput.value.trim();
+            if (propName && propValue) variant[propName] = propValue;
+        });
+
+        const price = row.querySelector('.variant-price')?.value.trim();
+        if (price) {
+            variant.offers = {
+                "@type": "Offer", "price": price, "priceCurrency": masterOfferDetails.priceCurrency,
+                "availability": "https://schema.org/InStock",
+                "shippingDetails": masterOfferDetails.shippingDetails,
+                "hasMerchantReturnPolicy": masterOfferDetails.hasMerchantReturnPolicy,
+                "priceValidUntil": masterOfferDetails.priceValidUntil
+            };
+            if (masterOfferDetails.priceSpecifications.length > 0) {
+                variant.offers.priceSpecification = masterOfferDetails.priceSpecifications.length > 1 ? [...masterOfferDetails.priceSpecifications] : { ...masterOfferDetails.priceSpecifications[0] };
+            }
+            if (baseUrl) {
+                try {
+                    const url = new URL(baseUrl);
+                    if (variant.size) url.searchParams.set('size', variant.size);
+                    if (variant.color) url.searchParams.set('color', variant.color);
+                    variant.offers.url = url.href;
+                } catch (e) { console.warn("Could not construct variant URL:", e); }
+            }
+        }
+        return variant;
+    }
+
+    /**
+     * [HELPER] Builds the complete "offers" object for a single product.
+     * @param {Array} productEntities - Product-specific entities.
+     * @param {Function} findProductEntity - Helper to find a specific product entity.
+     * @param {Object} config - Configuration object with DOM-derived values.
+     * @param {NodeListOf<Element>} config.memberPriceRows - A NodeList of member price row elements.
+     * @param {string} config.customCurrencyValue - The value from the custom currency input.
+     * @returns {Object|null} The offers object or null if no price is found.
+     */
+    function _buildSingleProductOffer(productEntities, findProductEntity, config) {
+        const regularPriceEntity = findProductEntity('price');
+        const regularPrice = regularPriceEntity?.value;
+
+        if (!regularPrice && config.memberPriceRows.length === 0) {
+            return null;
+        }
+
+        const offer = {
+            "@type": "Offer",
+            "availability": "https://schema.org/InStock"
+        };
+        if (regularPrice) {
+            offer.price = regularPrice;
+        }
+
+        offer.priceCurrency = _determineFinalCurrency(findProductEntity, config.customCurrencyValue);
+
+        const validUntilDate = findProductEntity('priceValidUntil')?.value;
+        if (validUntilDate) {
+            try {
+                offer.priceValidUntil = new Date(validUntilDate).toISOString().split('T')[0];
+            } catch (e) { console.warn("Invalid date for priceValidUntil"); }
+        }
+
+        const priceSpecifications = [];
+        const strikethroughPrice = findProductEntity('strikethroughPrice')?.value;
+        if (strikethroughPrice) {
+            priceSpecifications.push({
+                "@type": "UnitPriceSpecification", "priceType": "https://schema.org/StrikethroughPrice",
+                "price": strikethroughPrice, "priceCurrency": offer.priceCurrency
+            });
+        }
+
+        config.memberPriceRows.forEach(row => {
+            const tierId = row.querySelector('.member-tier-select').value;
+            const priceInput = row.querySelector('.member-price-input');
+            const memberPriceValue = priceInput.value.trim();
+            if (tierId && memberPriceValue) {
+                const price = parseFloat(memberPriceValue);
+                if (isNaN(price) || price < 0) {
+                    priceInput.classList.add('is-invalid');
+                    showToast(`Invalid member price: "${memberPriceValue}". Please enter a valid number.`, 'warning');
+                    return;
+                }
+                priceInput.classList.remove('is-invalid');
+                priceSpecifications.push({
+                    "@type": "UnitPriceSpecification", "price": price.toString(), "priceCurrency": offer.priceCurrency,
+                    "validForMemberTier": { "@type": "MemberProgramTier", "@id": tierId }
+                });
+            }
+        });
+
+        if (!regularPrice && priceSpecifications.length > 0) {
+            const prices = priceSpecifications.map(p => parseFloat(p.price)).filter(p => !isNaN(p));
+            if (prices.length > 0) {
+                offer.price = Math.max(...prices).toString();
+            }
+        }
+
+        if (priceSpecifications.length > 0) {
+            offer.priceSpecification = priceSpecifications.length > 1 ? priceSpecifications : priceSpecifications[0];
+        }
+
+        buildShippingDetails(offer, findProductEntity);
+        buildReturnPolicy(offer, findProductEntity);
+        return offer;
+    }
+
+    /**
+     * [HELPER] Builds the aggregateRating object for a product.
+     * @param {Array} entities - All discovered entities.
+     * @returns {Object|null} The aggregateRating object or null.
+     */
+    function _buildAggregateRating(entities) {
+        const ratingEntity = entities.find(e => e.schemaProp === 'reviewRating');
+        const countEntity = entities.find(e => e.schemaProp === 'reviewCount');
+
+        if (ratingEntity) {
+            const ratingValue = parseFloat(ratingEntity.value);
+            const reviewCount = countEntity ? parseInt(countEntity.value) : null;
+
+            if (reviewCount && reviewCount >= 1) {
+                return {
+                    "@type": "AggregateRating",
+                    "ratingValue": ratingValue.toString(),
+                    "reviewCount": reviewCount.toString(),
+                    "bestRating": "5"
+                };
+            } else {
+                console.warn('Insufficient review data for aggregateRating (need at least 1 review)');
+            }
+        }
+        return null;
+    }
+
+     /**
+     * [HELPER] Determines the final currency to use for an offer.
+     * @param {Function} findProductEntity - Helper to find a specific product entity.
+     * @param {string} customCurrencyValue - The value from the custom currency input.
+     * @returns {string} The determined currency code.
+     */
+    function _determineFinalCurrency(findProductEntity, customCurrencyValue) {
+        if (customCurrencyValue) {
+            const isSelector = /[.#\[\]>+~]/.test(customCurrencyValue);
+            if (isSelector) {
+                const targetEl = safeQuerySelector(document, customCurrencyValue);
+                if (targetEl) return targetEl.textContent.trim();
+            } else {
+                return customCurrencyValue;
+            }
+        }
+
+        const currencyEntity = findProductEntity('priceCurrency');
+        if (currencyEntity) {
+            return currencyEntity.value;
+        }
+
+        return 'USD'; // Default fallback
+    }
+
+    /**
      * [HELPER] Builds the shipping details object for an offer.
      * @param {Object} offer - The offer object to attach details to.
      * @param {Function} findProductEntity - Helper to find a specific product entity.
@@ -3160,382 +3601,6 @@ function parseUnstructuredAddress(addressString) {
             audience.suggestedAge = { "@type": "QuantitativeValue", ...ageMap[ageGroup], "unitCode": "ANN" };
         }
         return audience;
-    }
-
-    /**
-     * [HELPER] Builds the aggregateRating object for a product.
-     * @param {Array} entities - All discovered entities.
-     * @returns {Object|null} The aggregateRating object or null.
-     */
-    function _buildAggregateRating(entities) {
-        const ratingEntity = entities.find(e => e.schemaProp === 'reviewRating');
-        const countEntity = entities.find(e => e.schemaProp === 'reviewCount');
-
-        if (ratingEntity) {
-            const ratingValue = parseFloat(ratingEntity.value);
-            const reviewCount = countEntity ? parseInt(countEntity.value) : null;
-
-            if (reviewCount && reviewCount >= 1) {
-                return {
-                    "@type": "AggregateRating",
-                    "ratingValue": ratingValue.toString(),
-                    "reviewCount": reviewCount.toString(),
-                    "bestRating": "5"
-                };
-            } else {
-                console.warn('Insufficient review data for aggregateRating (need at least 1 review)');
-            }
-        }
-        return null;
-    }
-
-    /**
-     * [HELPER] Builds the complete "offers" object for a single product.
-     * @param {Array} productEntities - Product-specific entities.
-     * @param {Function} findProductEntity - Helper to find a specific product entity.
-     * @returns {Object|null} The offers object or null if no price is found.
-     */
-    function _buildSingleProductOffer(productEntities, findProductEntity) {
-        const regularPriceEntity = findProductEntity('price');
-        const regularPrice = regularPriceEntity?.value;
-        const memberPriceRows = document.querySelectorAll('#memberPricingContainer .member-price-row');
-
-        if (!regularPrice && memberPriceRows.length === 0) {
-            return null;
-        }
-
-        const offer = {
-            "@type": "Offer",
-            "availability": "https://schema.org/InStock"
-        };
-        if (regularPrice) {
-            offer.price = regularPrice;
-        }
-
-        offer.priceCurrency = _determineFinalCurrency(findProductEntity);
-
-        const validUntilDate = findProductEntity('priceValidUntil')?.value;
-        if (validUntilDate) {
-            try {
-                offer.priceValidUntil = new Date(validUntilDate).toISOString().split('T')[0];
-            } catch (e) { console.warn("Invalid date for priceValidUntil"); }
-        }
-
-        const priceSpecifications = [];
-        const strikethroughPrice = findProductEntity('strikethroughPrice')?.value;
-        if (strikethroughPrice) {
-            priceSpecifications.push({
-                "@type": "UnitPriceSpecification", "priceType": "https://schema.org/StrikethroughPrice",
-                "price": strikethroughPrice, "priceCurrency": offer.priceCurrency
-            });
-        }
-
-        memberPriceRows.forEach(row => {
-            const tierId = row.querySelector('.member-tier-select').value;
-            const priceInput = row.querySelector('.member-price-input');
-            const memberPriceValue = priceInput.value.trim();
-            if (tierId && memberPriceValue) {
-                const price = parseFloat(memberPriceValue);
-                if (isNaN(price) || price < 0) {
-                    priceInput.classList.add('is-invalid');
-                    showToast(`Invalid member price: "${memberPriceValue}". Please enter a valid number.`, 'warning');
-                    return;
-                }
-                priceInput.classList.remove('is-invalid');
-                priceSpecifications.push({
-                    "@type": "UnitPriceSpecification", "price": price.toString(), "priceCurrency": offer.priceCurrency,
-                    "validForMemberTier": { "@type": "MemberProgramTier", "@id": tierId }
-                });
-            }
-        });
-
-        if (!regularPrice && priceSpecifications.length > 0) {
-            const prices = priceSpecifications.map(p => parseFloat(p.price)).filter(p => !isNaN(p));
-            if (prices.length > 0) {
-                offer.price = Math.max(...prices).toString();
-            }
-        }
-
-        if (priceSpecifications.length > 0) {
-            offer.priceSpecification = priceSpecifications.length > 1 ? priceSpecifications : priceSpecifications[0];
-        }
-
-        buildShippingDetails(offer, findProductEntity);
-        buildReturnPolicy(offer, findProductEntity);
-        return offer;
-    }
-
-    /**
-     * [HELPER] Populates the schema object for a single product.
-     * @param {Object} schema - The schema object to populate.
-     * @param {Array} entities - All discovered entities.
-     * @param {Array} productEntities - Product-specific entities.
-     * @param {Function} findProductEntity - Helper to find a specific product entity.
-     */
-    function _populateSingleProduct(schema, entities, productEntities, findProductEntity) {
-        schema.name = findProductEntity('contextualName')?.value || entities.find(e => e.schemaProp === 'name')?.value;
-
-        let finalImageUrls = [];
-        const manualImageUrls = DOM.customProductImageOverride?.value?.trim();
-        if (manualImageUrls) {
-            finalImageUrls = manualImageUrls.split(',').map(url => url.trim()).filter(Boolean);
-        }
-        if (finalImageUrls.length === 0) {
-            const imageEntity = findProductEntity('image');
-            if (imageEntity) {
-                if (imageEntity.rawValue && Array.isArray(imageEntity.rawValue)) {
-                    finalImageUrls = imageEntity.rawValue;
-                } else if (imageEntity.value) {
-                    finalImageUrls = imageEntity.value.split(',').map(url => url.trim()).filter(Boolean);
-                }
-            }
-        }
-        if (finalImageUrls.length === 0) {
-            const ogImageEntity = entities.find(e => e.schemaProp === 'image' && !e.type);
-            if (ogImageEntity && ogImageEntity.value) {
-                finalImageUrls.push(ogImageEntity.value);
-            }
-        }
-        if (finalImageUrls.length > 1) {
-            schema.image = finalImageUrls;
-        } else if (finalImageUrls.length === 1) {
-            schema.image = finalImageUrls[0];
-        }
-
-        let finalDescription = null;
-        const manualOverride = DOM.customProductDescriptionOverride?.value?.trim();
-        if (manualOverride) {
-            finalDescription = manualOverride;
-        }
-        if (!finalDescription) {
-            const descriptionEntity = findProductEntity('description');
-            if (descriptionEntity) {
-                finalDescription = descriptionEntity.value;
-            }
-        }
-        if (finalDescription) {
-            schema.description = finalDescription;
-        }
-
-        schema.brand = findProductEntity('brand') ? { "@type": "Brand", "name": findProductEntity('brand').value } : null;
-        schema.sku = findProductEntity('sku')?.value;
-        schema.gtin = findProductEntity('gtin')?.value;
-        schema.mpn = findProductEntity('mpn')?.value;
-        schema.color = findProductEntity('color')?.value;
-        schema.material = findProductEntity('material')?.value;
-        schema.pattern = findProductEntity('pattern')?.value;
-        schema.audience = buildAudienceObject(findProductEntity);
-
-        const sizeValue = findProductEntity('size')?.value;
-        if (sizeValue) {
-            const sizeSystem = findProductEntity('sizeSystem')?.value;
-            const sizeGroup = findProductEntity('sizeGroup')?.value;
-            if (sizeSystem || sizeGroup) {
-                schema.size = { "@type": "SizeSpecification", "name": sizeValue };
-                if (sizeSystem) { schema.size.sizeSystem = `https://schema.org/WearableSizeSystem${sizeSystem}`; }
-                if (sizeGroup) { schema.size.sizeGroup = `https://schema.org/WearableSizeGroup${sizeGroup}`; }
-            } else {
-                schema.size = sizeValue;
-            }
-        }
-
-        schema.offers = _buildSingleProductOffer(productEntities, findProductEntity);
-        schema.aggregateRating = _buildAggregateRating(entities);
-    }
-
-     /**
-     * [HELPER] Populates the schema object for a product group with variants.
-     * @param {Object} schema - The schema object to populate.
-     * @param {Array} entities - All discovered entities.
-     * @param {Array} productEntities - Product-specific entities.
-     * @param {Function} findProductEntity - Helper to find a specific product entity.
-     */
-    function _populateProductGroup(schema, entities, productEntities, findProductEntity) {
-        const seenSkus = new Set();
-        let hasDuplicateSkus = false;
-        const groupId = DOM.productGroupId.value.trim();
-        schema['@type'] = 'ProductGroup';
-        schema.productGroupID = groupId;
-        schema['@id'] = `#${groupId}`;
-
-        const variesBy = Array.from(DOM.variesByCheckboxes).filter(cb => cb.checked).map(cb => cb.value);
-        if (variesBy.length > 0) { schema.variesBy = variesBy; }
-
-        const inheritable = {
-            brand: findProductEntity('brand') ? { "@type": "Brand", "name": findProductEntity('brand').value } : null,
-            image: (() => {
-                const imgEntity = findProductEntity('image');
-                if (!imgEntity) return null;
-                if (imgEntity.rawValue && Array.isArray(imgEntity.rawValue)) {
-                    return imgEntity.rawValue.length > 1 ? imgEntity.rawValue : imgEntity.rawValue[0];
-                }
-                if (imgEntity.value) {
-                    const urls = imgEntity.value.split(',').map(u => u.trim()).filter(Boolean);
-                    return urls.length > 1 ? urls : urls[0];
-                }
-                return null;
-            })(),
-            description: findProductEntity('description')?.value,
-            material: findProductEntity('material')?.value,
-            pattern: findProductEntity('pattern')?.value,
-            gtin: findProductEntity('gtin')?.value,
-            mpn: findProductEntity('mpn')?.value,
-            audience: buildAudienceObject(findProductEntity)
-        };
-        Object.keys(inheritable).forEach(key => (inheritable[key] === undefined || inheritable[key] === null) && delete inheritable[key]);
-
-        schema.name = findProductEntity('contextualName')?.value || entities.find(e => e.schemaProp === 'name')?.value;
-        Object.assign(schema, inheritable);
-
-        const finalCurrency = _determineFinalCurrency(findProductEntity);
-
-        const masterOfferDetails = {
-            priceCurrency: finalCurrency,
-            priceSpecifications: []
-        };
-        const validUntilDate = findProductEntity('priceValidUntil')?.value;
-        if (validUntilDate) {
-            try {
-                masterOfferDetails.priceValidUntil = new Date(validUntilDate).toISOString().split('T')[0];
-            } catch (e) { /* ignore */ }
-        }
-        const strikethroughPrice = findProductEntity('strikethroughPrice')?.value;
-        if (strikethroughPrice) {
-            masterOfferDetails.priceSpecifications.push({
-                "@type": "UnitPriceSpecification", "priceType": "https://schema.org/StrikethroughPrice",
-                "price": strikethroughPrice, "priceCurrency": masterOfferDetails.priceCurrency
-            });
-        }
-        document.querySelectorAll('#memberPricingContainer .member-price-row').forEach(row => {
-            const tierId = row.querySelector('.member-tier-select').value;
-            const priceInput = row.querySelector('.member-price-input');
-            const priceValue = priceInput.value.trim();
-            if (tierId && priceValue) {
-                const price = parseFloat(priceValue);
-                if (isNaN(price) || price < 0) {
-                    priceInput.classList.add('is-invalid');
-                    showToast(`Invalid member price: "${priceValue}"`, 'warning');
-                    return;
-                }
-                priceInput.classList.remove('is-invalid');
-                masterOfferDetails.priceSpecifications.push({
-                    "@type": "UnitPriceSpecification", "price": price.toString(), "priceCurrency": masterOfferDetails.priceCurrency,
-                    "validForMemberTier": { "@type": "MemberProgramTier", "@id": tierId }
-                });
-            }
-        });
-        const tempOfferForLogistics = { priceCurrency: masterOfferDetails.priceCurrency };
-        buildShippingDetails(tempOfferForLogistics, findProductEntity);
-        buildReturnPolicy(tempOfferForLogistics, findProductEntity);
-        masterOfferDetails.shippingDetails = tempOfferForLogistics.shippingDetails;
-        masterOfferDetails.hasMerchantReturnPolicy = tempOfferForLogistics.hasMerchantReturnPolicy;
-
-        const variants = [];
-        document.querySelectorAll('#variantsContainer .variant-row').forEach(row => {
-            const variant = { "@type": "Product", ...inheritable, "isVariantOf": { "@id": `#${groupId}` } };
-            const variantImageUrl = row.querySelector('.variant-image')?.value.trim();
-            if (variantImageUrl) { variant.image = variantImageUrl; }
-            const skuInput = row.querySelector('.variant-sku');
-            const sku = skuInput?.value.trim();
-            if (sku) {
-                if (seenSkus.has(sku)) {
-                    skuInput.classList.add('is-invalid');
-                    hasDuplicateSkus = true;
-                } else {
-                    skuInput.classList.remove('is-invalid');
-                    seenSkus.add(sku);
-                    variant.sku = sku;
-                }
-            }
-            const name = row.querySelector('.variant-name')?.value.trim();
-            if (name) { variant.name = name; }
-            row.querySelectorAll('.variant-prop').forEach(propInput => {
-                const propName = propInput.dataset.propName;
-                const propValue = propInput.value.trim();
-                if (propName && propValue) variant[propName] = propValue;
-            });
-            const price = row.querySelector('.variant-price')?.value.trim();
-            if (price) {
-                variant.offers = {
-                    "@type": "Offer", "price": price, "priceCurrency": masterOfferDetails.priceCurrency,
-                    "availability": "https://schema.org/InStock",
-                    "shippingDetails": masterOfferDetails.shippingDetails,
-                    "hasMerchantReturnPolicy": masterOfferDetails.hasMerchantReturnPolicy,
-                    "priceValidUntil": masterOfferDetails.priceValidUntil
-                };
-                if (masterOfferDetails.priceSpecifications.length > 0) {
-                    variant.offers.priceSpecification = masterOfferDetails.priceSpecifications.length > 1 ? [...masterOfferDetails.priceSpecifications] : { ...masterOfferDetails.priceSpecifications[0] };
-                }
-                const baseUrl = DOM.urlInput.value.trim() || DOM.baseUrlInput.value.trim();
-                if (baseUrl) {
-                    try {
-                        const url = new URL(baseUrl);
-                        if (variant.size) url.searchParams.set('size', variant.size);
-                        if (variant.color) url.searchParams.set('color', variant.color);
-                        variant.offers.url = url.href;
-                    } catch (e) { console.warn("Could not construct variant URL:", e); }
-                }
-            }
-            variants.push(variant);
-        });
-        if (hasDuplicateSkus) {
-            showToast('Duplicate SKUs detected. Each variant must have a unique SKU.', 'warning');
-        }
-        if (variants.length > 0) {
-            schema.hasVariant = variants;
-        }
-    }
-
-     /**
-     * [HELPER] Determines the final currency to use for an offer.
-     * Priority: Custom Input > Discovered Entity > Default 'USD'
-     * @param {Function} findProductEntity - Helper to find a specific product entity.
-     * @returns {string} The determined currency code.
-     */
-    function _determineFinalCurrency(findProductEntity) {
-        const currencyInput = DOM.customProductCurrency?.value?.trim();
-        if (currencyInput) {
-            const isSelector = /[.#\[\]>+~]/.test(currencyInput);
-            if (isSelector) {
-                const targetEl = safeQuerySelector(document, currencyInput);
-                if (targetEl) return targetEl.textContent.trim();
-            } else {
-                return currencyInput;
-            }
-        }
-
-        const currencyEntity = findProductEntity('priceCurrency');
-        if (currencyEntity) {
-            return currencyEntity.value;
-        }
-
-        return 'USD'; // Default fallback
-    }
-
-    /**
-     * Populates product properties by dispatching to specialized helper functions.
-     * @param {Object} schema - The schema object to populate.
-     * @param {Array} entities - The array of all discovered entities from the page.
-     * @param {boolean} isPrimary - A flag indicating if this is the primary schema entity.
-     */
-    function populateProductProperties(schema, entities, isPrimary) {
-        const productEntities = entities.filter(e => e.type === 'Product');
-        const findProductEntity = (prop) => productEntities.find(e => e.schemaProp === prop);
-
-        let hasVariants = DOM.productHasVariantsSwitch.checked;
-        if (hasVariants && !DOM.productGroupId.value.trim()) {
-            showToast('Product Group ID is required for variant products.', 'danger');
-            hasVariants = false; // Force single product mode if group ID is missing
-        }
-
-        if (hasVariants) {
-            _populateProductGroup(schema, entities, productEntities, findProductEntity);
-        } else {
-            _populateSingleProduct(schema, entities, productEntities, findProductEntity);
-        }
-
-        // Final cleanup of the main schema object
-        Object.keys(schema).forEach(key => (schema[key] === undefined || schema[key] === null) && delete schema[key]);
     }
 
     /**
