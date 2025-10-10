@@ -1,0 +1,139 @@
+/* START OF FILE styles.css */
+
+.analysis-column {
+  background-color: var(--bs-body-bg);
+  border-left: 1px solid var(--bs-border-color);
+  border-right: 1px solid var(--bs-border-color);
+}
+
+.entity-card {
+  border-right: 4px solid #667eea;
+  background-color: var(--bs-card-bg);
+}
+
+.schema-suggestion {
+  cursor: pointer;
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.schema-suggestion:hover {
+  background-color: var(--bs-tertiary-bg);
+}
+
+/* Accessibility Improvement: Visible focus state for custom button-like elements */
+
+.schema-suggestion:focus-visible {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 .25rem rgba(var(--bs-primary-rgb), .25);
+}
+
+.schema-explanation {
+  font-size: 0.8rem;
+  color: var(--bs-secondary-color);
+  background-color: var(--bs-tertiary-bg);
+  border-top: 1px dashed var(--bs-border-color);
+}
+
+.code-header {
+  background-color: var(--bs-dark-bg-subtle);
+  color: var(--bs-emphasis-color);
+}
+
+[dir="rtl"] .accordion-button::after {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+/* CHANGE: Added for better color contrast on prices/important text */
+
+.text-high-contrast-success {
+  color: var(--bs-success-text-emphasis);
+  font-weight: bold;
+}
+
+[data-bs-theme="dark"] .text-high-contrast-success {
+  color: #75b798;
+}
+
+.input-group-text {
+  width: 125px;
+}
+
+.price-in {
+  width: 50px;
+}
+
+/* *
+ * ===================================================================
+ *  Enhanced Form Control UX
+ * =================================================================== */
+
+/* * Custom placeholder styling for better visual hierarchy.
+ * We make the placeholder text fainter than Bootstrap's default (which is opacity: 0.5)
+ * to create a clearer distinction between placeholder hints and user-entered text.
+ * We use Bootstrap's CSS variable for color to ensure it adapts to theme changes (e.g., light/dark mode). */
+
+:root {
+  --placeholder-color: var(--bs-secondary-color);
+  --placeholder-opacity: 0.4;
+}
+
+/* Placeholder Styling */
+
+.form-control::placeholder {
+  color: var(--placeholder-color);
+  opacity: var(--placeholder-opacity);
+}
+
+.form-control::-webkit-input-placeholder {
+  color: var(--placeholder-color);
+  opacity: var(--placeholder-opacity);
+}
+
+.form-control::-moz-placeholder {
+  color: var(--placeholder-color);
+  opacity: var(--placeholder-opacity);
+}
+
+/* Optional: drop IE rule unless legacy support is critical */
+
+/* Ensure user text remains solid */
+
+.form-control {
+  color: var(--bs-body-color);
+  opacity: 1;
+}
+
+/* Salary Validation Styles */
+
+.form-control.is-invalid {
+  border-color: #dc3545;
+  padding-right: calc(1.5em + 0.75rem);
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right calc(0.375em + 0.1875rem) center;
+  background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+.form-control.is-invalid:focus {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+}
+
+.invalid-feedback {
+  display: none;
+  width: 100%;
+  margin-top: 0.25rem;
+  font-size: 0.875em;
+  color: #dc3545;
+}
+
+/* * Fix for Analysis History modal height.
+ * Ensures the modal body has a minimum height to prevent it from collapsing
+ * when it contains only a small number of history items. */
+
+#historyModal .modal-body {
+  min-height: 400px;
+}
+

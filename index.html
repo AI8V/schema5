@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<html data-bs-theme="dark" lang="en" data-bss-forced-theme="dark">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Free Schema Markup Generator for SGE &amp; Rich Results | Ai8V</title>
+    <meta property="og:title" content="Free Schema Markup Generator for SGE &amp; Rich Results | Ai8V">
+    <meta property="og:image" content="og-schema-architect.webp">
+    <meta name="twitter:title" content="Free Schema Markup Generator (JSON-LD) | Ai8V Schema Architect">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta property="og:url" content="https://ai8v.com/tools/schema-architect">
+    <meta name="twitter:description" content="Ai8V Schema Architect intelligently analyzes your content and suggests the best JSON-LD schema types to improve SEO, rankings, and rich results.">
+    <meta name="twitter:image" content="og-schema-architect.webp">
+    <meta property="og:type" content="website">
+    <meta name="description" content="Ai8V's free Schema Architect intelligently analyzes any URL or HTML to generate perfect, Google-ready JSON-LD. Optimize for SGE &amp; Rich Results in seconds.">
+    <meta property="og:description" content="Ai8V's free Schema Architect intelligently analyzes any URL or HTML to generate perfect, Google-ready JSON-LD. Optimize for SGE &amp; Rich Results in seconds.">
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="assets/css/bs-theme-overrides.css">
+    <link rel="stylesheet" href="assets/css/schema-architect/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="assets/css/schema-architect/tooltip.css">
+</head>
+
+<body class="text-muted">
+    <main class="container-fluid g-0">
+        <header class="text-center my-2">
+            <h1 class="display-4 fw-bold text-warning my-4">Schema Architect</h1>
+        </header>
+        <div class="row g-0 border-primary border-opacity-50 border-top" style="min-height:calc(100vh - 56px);">
+            <div class="col-lg-3 bg-body-tertiary px-2 py-4">
+                <h2 class="text-success-emphasis mb-4 h4"><span class="text-primary me-2 bi bi-sliders" aria-hidden="true"></span> Control Panel</h2>
+                <div class="mb-3"><label class="form-label fw-bold ms-2" for="urlInput">Page URL</label><input type="url" class="form-control" id="urlInput" placeholder="https://example.com/..."></div>
+                <div class="text-center my-2 small"><span class="fw-semibold text-primary">OR</span></div>
+                <div class="mb-3" id="baseUrlContainer" style="display:none;"><label class="form-label fw-bold" for="baseUrlInput">Base URL (for resolving relative paths)</label><input type="url" class="form-control" id="baseUrlInput" placeholder="https://example.com/page.html"></div>
+                <div class="mb-3"><label class="form-label fw-bold ms-2" for="htmlContentInput">Paste HTML Code</label><textarea id="htmlContentInput" class="form-control" placeholder="<html>...</html>" rows="8"></textarea></div>
+                <div class="d-grid mt-4"><button class="btn btn-primary btn-lg" id="analyzeBtn"><span class="me-2 bi bi-cpu-fill" aria-hidden="true"></span> Analyze Content </button></div>
+                <div class="mt-4 project-hub-container"><label class="form-label fw-bold text-success-emphasis" for="projectSelector"><span class="text-primary me-2 bi bi-folder2-open" aria-hidden="true"></span>Projects &amp; Templates</label>
+                    <div class="input-group"><select class="rounded form-select" id="projectSelector">
+                            <option value="" selected="">-- Select a Saved Project --</option>
+                        </select><button class="btn btn-outline-danger rounded ms-2" id="deleteProjectBtn" type="button" title="Delete Selected Project"><span class="bi bi-trash-fill" aria-hidden="true"></span><span class="visually-hidden">Delete Project</span></button></div>
+                    <div class="input-group mt-2"><input class="rounded form-control vw-100 mb-1" type="text" id="newProjectName" placeholder="New project or template name..."><button class="btn btn-success btn-sm rounded vw-100" id="saveProjectBtn" type="button"><span class="me-2 bi bi-save-fill" aria-hidden="true"></span> Save as Template</button><button class="btn btn-warning btn-sm rounded vw-100 mt-1" id="empBtn" type="button" title="Entity Management Platform"><span class="me-2 bi bi-buildings-fill" aria-hidden="true"></span> EMP</button></div>
+                </div>
+                <hr class="my-4">
+                <h3 class="text-success-emphasis ms-2 h5">Advanced Options</h3>
+                <div class="mb-3 form-switch form-check"><input type="checkbox" checked="" class="form-check-input" id="autoDetectSwitch" role="switch"><label class="form-check-label" for="autoDetectSwitch">Auto-detect Schema</label></div>
+                <div id="customIdentifiersAccordion" class="accordion">
+                    <div class="accordion-item">
+                        <h3 id="headingProduct" class="accordion-header h2"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseProduct"><span class="text-primary me-2 bi bi-box-seam-fill" aria-hidden="true"></span> Product Identifiers</button></h3>
+                        <div id="collapseProduct" class="accordion-collapse collapse" data-bs-parent="#customIdentifiersAccordion">
+                            <div class="accordion-body">
+                                <div class="rounded border-primary-subtle d-flex mb-2 form-check form-switch"><input type="checkbox" class="form-check-input" id="productHasVariantsSwitch" role="switch"><label class="fw-bold text-success-emphasis ms-2 form-check-label" for="productHasVariantsSwitch"> This product has variants</label></div>
+                                <div id="singleProductFields">
+                                    <div class="mb-2"><label class="form-label ms-1 small" for="customProductImageSelector"><strong>Image(s) (Selector)</strong></label>
+                                        <div class="input-group input-group-sm"><input class="form-control" type="text" id="customProductImageSelector" placeholder=".product-gallery img, .main-image"></div>
+                                    </div>
+                                    <div class="mb-2"><label class="form-label ms-1 small" for="customProductImageOverride"><strong>Image(s) (Manual Override)</strong><span class="text-primary ms-1 bi bi-info-circle" title="Enter one or more image URLs, separated by commas. This will ALWAYS override any auto-detected images." data-bs-toggle="tooltip" data-bs-placement="top"></span></label><textarea class="form-control-sm form-control" id="customProductImageOverride" placeholder="https://example.com/img1.jpg, https://example.com/img2.jpg" rows="2"></textarea></div>
+                                    <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customProductPrice">Price</label><input class="form-control" type="text" id="customProductPrice" placeholder=".product-price, [itemprop='price']" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector that targets the element containing the product price.<br>Supported selectors include: <span class='text-success'>class.product-price</span> or <span class='text-success'>[itemprop='price']</span>"></div>
+                                    <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customProductStrikethroughPrice">Original Price</label><input class="form-control" type="text" id="customProductStrikethroughPrice" placeholder=".original-price, .list-price, del" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'><strong class='text-warning'>Original (Strikethrough) Price</strong><hr class='my-1'><p class='mb-1 small'>Enter the CSS selector that targets the element containing the <strong>original, higher price</strong> before the discount.</p><p class='mb-0 small'><i class='bi bi-info-circle-fill text-primary me-1'></i>This is used to create the 'sale' effect in Google Search.</p></div>"></div>
+                                    <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customProductCurrency">Currency</label><input class="form-control" type="text" id="customProductCurrency" placeholder=".product-currency, [itemprop='priceCurrency']" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector that targets the element containing the product currency.<br>Supported selectors include: <span class='text-success'>class.product-currency</span> or <span class='text-success'>[itemprop='priceCurrency']</span><hr class='my-1'><span class='text-primary'>Note: </span>This field is often inferred automatically, but a selector can be useful."></div>
+                                    <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customPriceValidUntil">Price Valid Until</label><input class="form-control" id="customPriceValidUntil" type="date"></div>
+                                    <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customProductSku">SKU</label><input class="form-control" type="text" id="customProductSku" placeholder=".product-sku, [itemprop='sku']" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector that targets the element containing the product SKU.<br>Supported selectors include: <span class='text-success'>class.product-sku</span> or <span class='text-success'>[itemprop='sku']</span>"></div>
+                                    <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customProductGtin">GTIN</label><input class="form-control" type="text" id="customProductGtin" placeholder="ex: UPC, EAN, ISBN"></div>
+                                    <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customProductMpn">MPN</label><input class="form-control" type="text" id="customProductMpn" placeholder="Manufacturer Part Number"></div>
+                                    <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customProductBrand">Brand</label><input class="form-control" type="text" id="customProductBrand" placeholder=".product-brand, [itemprop='brand']" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector that targets the element containing the product brand.<br>Supported selectors include: <span class='text-success'>class.product-brand</span> or <span class='text-success'>[itemprop='brand']</span>"></div>
+                                    <div class="mb-2"><label class="form-label ms-1 small" for="customProductDescriptionSelector"><strong>Description (Selector)</strong></label>
+                                        <div class="input-group input-group-sm"><input class="form-control" type="text" id="customProductDescriptionSelector" placeholder=".product-description, .lead"></div>
+                                    </div>
+                                    <div class="mb-2"><label class="form-label ms-1 small" for="customProductDescriptionOverride"><strong>Description (Manual Override)</strong><span class="text-primary ms-1 bi bi-info-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="Use this field to write a specific, feature-rich description for your schema. It will ALWAYS override the auto-detected description." aria-hidden="true"></span></label><textarea class="form-control-sm form-control" id="customProductDescriptionOverride" placeholder="Enter a custom description to override auto-detection..." rows="3"></textarea></div>
+                                    <hr class="my-3">
+                                    <h4 class="text-success-emphasis h6">Member Pricing (Optional)</h4>
+                                    <div id="memberPricingContainer"></div><button class="btn btn-outline-info btn-sm" type="button" id="addMemberPriceBtn"><span class="text-primary me-1 bi bi-plus-circle" aria-hidden="true"></span> Add Member Price</button><template id="memberPriceTemplate">
+    <div class="input-group input-group-sm mb-2 member-price-row">
+        <select class="form-select member-tier-select" style="flex-grow: 2;">
+            <option value="">-- Select Loyalty Tier --</option>
+        </select>
+        <span class="input-group-text price-in">Price</span>
+        <input type="number" class="form-control member-price-input" placeholder="Member Price">
+        <button class="btn btn-outline-danger btn-sm remove-member-price-btn" type="button" title="Remove Price">
+            <span class="bi bi-trash" aria-hidden="true"></span>
+        </button>
+    </div>
+</template>
+                                    <hr class="mt-1 mb-3">
+                                    <h4 class="text-success-emphasis mb-3 h6">Apparel Size (Advanced)</h4>
+                                    <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customProductSize">Size</label><input class="form-control" type="text" id="customProductSize" placeholder=".size-value, [itemprop='size']" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'><strong class='text-success'>Size Value Selector</strong><hr class='my-1'><p class='mb-0 small'>Enter the CSS selector for the element containing the size text (ex: 'XL', '42', 'Medium').</p></div>"></div>
+                                    <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customProductSizeSystem">Size System</label><select class="form-select" id="customProductSizeSystem" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'><strong class='text-success'>International Sizing System</strong><hr class='my-1'><p class='mb-0 small'>Select the sizing system this product follows (ex: US, EU). Crucial for international customers.</p></div>">
+                                            <option value="" selected="">Optional System</option>
+                                            <option value="AU">Australia (AU)</option>
+                                            <option value="BR">Brazil (BR)</option>
+                                            <option value="CN">China (CN)</option>
+                                            <option value="DE">Germany (DE)</option>
+                                            <option value="EU">Europe (EU)</option>
+                                            <option value="FR">France (FR)</option>
+                                            <option value="IT">Italy (IT)</option>
+                                            <option value="JP">Japan (JP)</option>
+                                            <option value="MX">Mexico (MX)</option>
+                                            <option value="UK">United Kingdom (UK)</option>
+                                            <option value="US">United States (US)</option>
+                                        </select></div>
+                                    <div class="input-group input-group-sm"><label class="input-group-text" for="customProductSizeGroup">Size Group</label><select class="form-select" id="customProductSizeGroup" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'><strong class='text-success'>Wearable Size Group</strong><hr class='my-1'><p class='mb-0 small'>Select the group this size belongs to (ex: Petite, Maternity).</p></div>">
+                                            <option value="" selected="">Optional Group</option>
+                                            <option value="Regular">Regular</option>
+                                            <option value="Petite">Petite</option>
+                                            <option value="Plus">Plus</option>
+                                            <option value="Tall">Tall</option>
+                                            <option value="Big">Big</option>
+                                            <option value="Maternity">Maternity</option>
+                                        </select></div>
+                                    <hr class="my-3">
+                                    <h4 class="text-success-emphasis mb-3 h6"><span class="me-2 bi bi-palette-fill" aria-hidden="true"></span>Physical Properties (Optional)</h4>
+                                    <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customProductColor">Color</label><input class="form-control" type="text" id="customProductColor" placeholder="ex: Red, Blue/White"></div>
+                                    <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customProductMaterial">Material</label><input class="form-control" type="text" id="customProductMaterial" placeholder="ex: Cotton, Leather"></div>
+                                    <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customProductPattern">Pattern</label><input class="form-control" type="text" id="customProductPattern" placeholder="ex: Striped, Polka Dot"></div>
+                                    <h4 class="text-success-emphasis mt-3 mb-3 h6"><span class="me-2 bi bi-people-fill" aria-hidden="true"></span>Audience (Optional)</h4>
+                                    <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customProductGender">Gender</label><select class="form-select" id="customProductGender">
+                                            <option value="" selected="">Not specified</option>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                            <option value="Unisex">Unisex</option>
+                                        </select></div>
+                                    <div class="input-group input-group-sm"><label class="input-group-text" for="customProductAgeGroup">Age Group</label><select class="form-select" id="customProductAgeGroup">
+                                            <option value="" selected="">Not specified</option>
+                                            <option value="Newborn">Newborn (0-3 months)</option>
+                                            <option value="Infant">Infant (3-12 months)</option>
+                                            <option value="Toddler">Toddler (1-5 years)</option>
+                                            <option value="Kids">Kids (5-13 years)</option>
+                                            <option value="Adult">Adult (13+ years)</option>
+                                        </select></div>
+                                    <hr class="my-3">
+                                    <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customShippingRate">Shipping Rate</label><input class="form-control" type="text" id="customShippingRate" placeholder=".shipping-rate, .shipping-cost" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector that targets the element containing the shipping rate or cost.<br>Supported selectors include: <span class='text-success'>class.shipping-rate</span> or <span class='text-success'>.shipping-cost</span>"></div>
+                                    <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customShippingCountry">Shipping Country</label><input class="form-control" type="text" id="customShippingCountry" placeholder=".shipping-country, .shipping-zone" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector that targets the element containing the shipping country or zone.<br>Supported selectors include: <span class='text-success'>class.shipping-country</span> or <span class='text-success'>.shipping-zone</span>"></div>
+                                    <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customHandlingTime">Handling Time</label><input class="form-control" type="text" id="customHandlingTime" placeholder="ex: 1-2 (days)"></div>
+                                    <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customTransitTime">Transit Time</label><input class="form-control" type="text" id="customTransitTime" placeholder="ex: 3-5 (days)"></div>
+                                    <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customReturnDays">Return Days</label><input class="form-control" type="number" id="customReturnDays" placeholder=".return-days, .return-window" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector that targets the element containing the product return period (in days).<br>Supported selectors include: <span class='text-success'>class.return-days</span> or <span class='text-success'>.return-window</span>"></div>
+                                    <div class="input-group input-group-sm"><label class="input-group-text" for="customReturnFees">Return Fees</label><input class="form-control" type="text" id="customReturnFees" placeholder=".return-fees, .return-charge" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector that targets the element containing the product return fees or charges.<br>Supported selectors include: <span class='text-success'>class.return-fees</span> or <span class='text-success'>.return-charge</span>"></div>
+                                </div>
+                                <div id="variantProductFields" style="display: none;">
+                                    <h4 class="text-success-emphasis mb-2 h6">Parent Product Details (ProductGroup)</h4>
+                                    <div class="alert alert-info alert-dismissible fade show" role="alert"><span class="me-2 bi bi-info-circle-fill" aria-hidden="true"></span><strong>Important:</strong><span> Enter a Product Group ID and add at least one variant below before the schema will update. </span><button class="btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button></div>
+                                    <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="productGroupId">Product Group ID</label><input class="form-control" type="text" id="productGroupId" placeholder="Unique ID for this product family (ex: TSHIRT-CLASSIC)"></div>
+                                    <div class="mb-3"><label class="form-label fw-bold small">Variants differ by (variesBy):</label>
+                                        <div class="d-flex flex-wrap gap-2">
+                                            <div class="form-check"><input type="checkbox" class="form-check-input varies-by-checkbox" id="variesByColor" value="https://schema.org/color"><label class="form-check-label small" for="variesByColor">Color</label></div>
+                                            <div class="form-check"><input type="checkbox" class="form-check-input varies-by-checkbox" id="variesBySize" value="https://schema.org/size"><label class="form-check-label small" for="variesBySize">Size</label></div>
+                                            <div class="form-check"><input type="checkbox" class="form-check-input varies-by-checkbox" id="variesByMaterial" value="https://schema.org/material"><label class="form-check-label small" for="variesByMaterial">Material</label></div>
+                                            <div class="form-check"><input type="checkbox" class="form-check-input varies-by-checkbox" id="variesByPattern" value="https://schema.org/pattern"><label class="form-check-label small" for="variesByPattern">Pattern</label></div>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <h4 class="text-success-emphasis mb-2 h6">Individual Variants (Products)</h4>
+                                    <div id="variantsContainer"></div><button class="btn btn-success btn-sm mt-2" type="button" id="addVariantBtn"><span class="me-1 bi bi-plus-circle-fill" aria-hidden="true"></span> Add Variant </button><template id="variantTemplate">
+    <div class="border rounded p-3 mb-3 variant-row">
+        <div class="row g-2">
+            <div class="col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text">SKU</span>
+                    <input type="text" class="form-control variant-sku" placeholder="Unique SKU for this variant">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text">Price</span>
+                    <input type="number" class="form-control variant-price" placeholder="Price">
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text">Name</span>
+                    <input type="text" class="form-control variant-name"
+                        placeholder="Specific name (e.g., T-Shirt - Red, M)">
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="input-group input-group-sm mt-2">
+                    <span class="input-group-text">Image URL</span>
+                    <input type="url" class="form-control variant-image"
+                        placeholder="Optional: URL for this specific variant's image">
+                </div>
+            </div>
+            <div class="col-12 varies-by-fields-container"></div>
+        </div>
+        <button type="button" class="btn btn-danger btn-sm mt-2 remove-variant-btn float-end">Remove</button>
+    </div>
+</template>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 id="headingReview" class="accordion-header h2"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseReview"><span class="text-primary me-2 bi bi-star-fill" aria-hidden="true"></span> Review Identifiers</button></h3>
+                        <div id="collapseReview" class="accordion-collapse collapse" data-bs-parent="#customIdentifiersAccordion">
+                            <div class="accordion-body">
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customReviewContainer">Review Container</label><input class="form-control" type="text" id="customReviewContainer" placeholder=".review-snippet, [itemtype*='schema.org/Review']" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector that targets the container wrapping a single review.<br>Supported selectors include: <span class='text-success'>class.review-snippet</span> or <span class='text-success'>[itemtype='schema.org/Review']</span>"></div>
+                                <hr class="my-3">
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customReviewRating">Rating (Value)</label><input class="form-control" type="text" id="customReviewRating" placeholder=".rating-value, [itemprop='ratingValue']" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector that targets the element containing the rating value (numerical score).<br>Supported selectors include: <span class='text-success'>class.rating-value</span> or <span class='text-success'>[itemprop='ratingValue']</span>"></div>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customReviewItemName">Reviewed Item</label><input class="form-control" type="text" id="customReviewItemName" placeholder=".reviewed-item-name, .product-title-review" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector that targets the element containing the name of the reviewed item.<br>Supported selectors include: <span class='text-success'>class.reviewed-item-name</span> or <span class='text-success'>.product-title-review</span>"></div>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customReviewCount">Review Count</label><input class="form-control" type="text" id="customReviewCount" placeholder=".review-count, .rating-count, [itemprop='reviewCount'], [itemprop='ratingCount']"></div>
+                                <hr class="my-3">
+                                <h4 class="text-success-emphasis mb-2 h6">Pros &amp; Cons (Optional)</h4>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customReviewPros">Pros Container</label><input class="form-control" type="text" id="customReviewPros" placeholder=".pros-list li, .good-points"></div>
+                                <div class="input-group input-group-sm"><label class="input-group-text" for="customReviewCons">Cons Container</label><input class="form-control" type="text" id="customReviewCons" placeholder=".cons-list li, .bad-points"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 id="headingCourse" class="accordion-header h2"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCourse"><span class="text-primary me-2 bi bi-mortarboard-fill" aria-hidden="true"></span> Course Identifiers </button></h3>
+                        <div id="collapseCourse" class="accordion-collapse collapse" data-bs-parent="#customIdentifiersAccordion">
+                            <div class="accordion-body">
+                                <h4 class="text-success-emphasis mb-2 h6">Basic Structure</h4>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customCourseListContainer">List Container</label><input class="form-control" type="text" id="customCourseListContainer" placeholder=".course-list, .course-catalog" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'>     <strong class='text-success'>Main Course Catalog Container</strong>     <hr class='my-1'>     <p class='mb-1 small'>Enter the CSS selector for the element that wraps <strong>all</strong> of the course items on the page.</p>     <p class='mb-0 small text-muted'>         <i class='bi bi-bullseye me-1 text-success'></i>This is the most critical selector for list detection.     </p>     <hr class='my-1'>     <strong class='small text-primary'>Default selectors include:</strong>     <ul class='list-unstyled small mb-0 ps-3'>         <li><code>.course-list</code></li>         <li><code>.course-catalog</code></li>     </ul> </div>"></div>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customCourseItemContainer">Item Container</label><input class="form-control" type="text" id="customCourseItemContainer" placeholder=".course-listing, .course-item, [itemtype='schema.org/Course']" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'>     <strong class='text-success'>Single Course Item Container</strong><hr class='my-1'>     <p class='mb-1 small'>Enter the CSS selector for the repeating element that contains a <u>single</u> course's details.</p>     <hr class='my-1'><strong class='small text-primary'>Default selectors include:</strong>     <ul class='list-unstyled small mb-0 ps-3'><li><code>.course-listing</code></li><li><code>.course-item</code></li><li><code>[itemtype*='schema.org/Course']</code></li></ul> </div>"></div>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customCourseName">Course Name</label><input class="form-control" type="text" id="customCourseName" placeholder=".course-title, h1, h2, h3" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'>     <strong class='text-success'>Course Name Selector</strong><hr class='my-1'>     <p class='mb-0 small'>Selector for the element containing the course's name.</p>     <hr class='my-1'><strong class='small text-primary'>Default selectors include:</strong>     <ul class='list-unstyled small mb-0 ps-3'><li><code>.course-title</code></li><li><code>h1</code></li><li><code>h2</code></li><li><code>h3</code></li></ul> </div>"></div>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customCourseDescription">Description</label><input class="form-control" type="text" id="customCourseDescription" placeholder=".course-description, p" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'>     <strong class='text-success'>Course Description Selector</strong><hr class='my-1'>     <p class='mb-0 small'>Selector for the element containing the course's description.</p>     <hr class='my-1'><strong class='small text-primary'>Default selectors include:</strong>     <ul class='list-unstyled small mb-0 ps-3'><li><code>.course-description</code></li><li><code>paragraph</code></li></ul> </div>"></div>
+                                <hr class="my-3">
+                                <h4 class="text-success-emphasis mb-2 h6">Advanced Properties</h4>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customCourseCode">Course Code</label><input class="form-control" type="text" id="customCourseCode" placeholder=".course-code, .course-id, [itemprop='courseCode']" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'>     <strong class='text-success'>Course Code (ex: CS101)</strong><hr class='my-1'>     <p class='mb-0 small'>Selector for the unique identifier of the course.</p>     <hr class='my-1'><strong class='small text-primary'>Default selectors include:</strong>     <ul class='list-unstyled small mb-0 ps-3'><li><code>.course-code</code></li><li><code>.course-id</code></li><li><code>[itemprop='courseCode']</code></li></ul> </div>"></div>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customCoursePrice">Price</label><input class="form-control" type="text" id="customCoursePrice" placeholder=".course-price, .price, [itemprop='price']" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'>     <strong class='text-success'>Course Price</strong><hr class='my-1'>     <p class='mb-0 small'>Selector for the course fee. The tool can extract numbers from text like '$99.99' or 'Free'.</p>     <hr class='my-1'><strong class='small text-primary'>Default selectors include:</strong>     <ul class='list-unstyled small mb-0 ps-3'><li><code>.course-price</code></li><li><code>.price</code></li><li><code>[itemprop='price']</code></li></ul> </div>"></div>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customCourseCurrency">Currency</label><input class="form-control" type="text" id="customCourseCurrency" placeholder=".currency, [itemprop='priceCurrency']" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'>     <strong class='text-success'>Currency (Optional)</strong><hr class='my-1'>     <p class='mb-0 small'>Selector for the currency symbol or code. The tool will try to infer this automatically.</p>     <hr class='my-1'><strong class='small text-primary'>Default selectors include:</strong>     <ul class='list-unstyled small mb-0 ps-3'><li><code>.currency</code></li><li><code>[itemprop='priceCurrency']</code></li></ul> </div>"></div>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customCourseCredential">Cred. Awarded</label><input class="form-control" type="text" id="customCourseCredential" placeholder=".credential, .certificate, [itemprop='educationalCredentialAwarded']" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'>     <strong class='text-success'>Credential Awarded</strong><hr class='my-1'>     <p class='mb-0 small'>Selector for the certificate or degree awarded upon completion.</p>     <hr class='my-1'><strong class='small text-primary'>Default selectors include:</strong>     <ul class='list-unstyled small mb-0 ps-3'><li><code>.credential</code></li><li><code>.certificate</code></li><li><code>[itemprop='educationalCredentialAwarded']</code></li></ul> </div>"></div>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customCoursePrerequisites">Prerequisites</label><input class="form-control form-control" type="text" id="customCoursePrerequisites" placeholder=".prerequisites, .requirements, [itemprop='coursePrerequisites']" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'>     <strong class='text-success'>Prerequisites</strong><hr class='my-1'>     <p class='mb-0 small'>Selector for the element listing the requirements needed to enroll.</p>     <hr class='my-1'><strong class='small text-primary'>Default selectors include:</strong>     <ul class='list-unstyled small mb-0 ps-3'><li><code>.prerequisites</code></li><li><code>.requirements</code></li><li><code>[itemprop='coursePrerequisites']</code></li></ul> </div>"></div>
+                                <hr class="my-3">
+                                <h4 class="text-success-emphasis mb-2 h6">Course Instance Details</h4>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customCourseStartDate">Start Date</label><input class="form-control" type="text" id="customCourseStartDate" placeholder=".start-date, time[itemprop='startDate'], [itemprop='startDate']" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'>     <strong class='text-success'>Instance Start Date</strong><hr class='my-1'>     <p class='mb-0 small'>Selector for the start date of a specific course session.</p>     <hr class='my-1'><strong class='small text-primary'>Default selectors include:</strong>     <ul class='list-unstyled small mb-0 ps-3'><li><code>.start-date</code></li><li><code>time[itemprop='startDate']</code></li><li><code>[itemprop='startDate']</code></li></ul> </div>"></div>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customCourseEndDate">End Date</label><input class="form-control" type="text" id="customCourseEndDate" placeholder=".end-date, time[itemprop='endDate'], [itemprop='endDate']" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'>     <strong class='text-success'>Instance End Date</strong><hr class='my-1'>     <p class='mb-0 small'>Selector for the end date of a specific course session.</p>     <hr class='my-1'><strong class='small text-primary'>Default selectors include:</strong>     <ul class='list-unstyled small mb-0 ps-3'><li><code>.end-date</code></li><li><code>time[itemprop='endDate']</code></li><li><code>[itemprop='endDate']</code></li></ul> </div>"></div>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customCourseLocation">Location</label><input class="form-control" type="text" id="customCourseLocation" placeholder=".location, .venue, [itemprop='location']" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'>     <strong class='text-success'>Instance Location</strong><hr class='my-1'>     <p class='mb-0 small'>Selector for the physical location if the course is offline.</p>     <hr class='my-1'><strong class='small text-primary'>Default selectors include:</strong>     <ul class='list-unstyled small mb-0 ps-3'><li><code>.location</code></li><li><code>.venue</code></li><li><code>[itemprop='location']</code></li></ul> </div>"></div>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customCourseMode">Course Mode</label><input class="form-control" type="text" id="customCourseMode" placeholder=".course-mode, .delivery-mode, [itemprop='courseMode']" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'>     <strong class='text-success'>Instance Mode (online/offline)</strong><hr class='my-1'>     <p class='mb-0 small'>Selector for the delivery method (ex: 'online', 'on-site').</p>     <hr class='my-1'><strong class='small text-primary'>Default selectors include:</strong>     <ul class='list-unstyled small mb-0 ps-3'><li><code>.course-mode</code></li><li><code>.delivery-mode</code></li><li><code>[itemprop='courseMode']</code></li></ul> </div>"></div>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customCourseInstructor">Instructor</label><input class="form-control" type="text" id="customCourseInstructor" placeholder=".instructor, .teacher, .faculty, [itemprop='instructor']" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'>     <strong class='text-success'>Instance Instructor</strong><hr class='my-1'>     <p class='mb-0 small'>Selector for the instructor's name for a specific session.</p>     <hr class='my-1'><strong class='small text-primary'>Default selectors include:</strong>     <ul class='list-unstyled small mb-0 ps-3'><li><code>.instructor</code></li><li><code>.teacher</code></li><li><code>.faculty</code></li><li><code>[itemprop='instructor']</code></li></ul> </div>"></div>
+                                <hr class="my-3">
+                                <div class="alert alert-info mb-2 small" role="alert"><span class="text-primary me-2 bi bi-info-circle-fill" aria-hidden="true"></span><strong>Multiple Instances Detection:</strong><span> If your page lists multiple sessions for the same course (ex: "Online Jan 2025" and "Campus Feb 2025"), provide a selector for the container that groups each session's details.</span></div>
+                                <div class="input-group input-group-sm"><label class="input-group-text" for="customCourseInstanceContainer">Optional Instance</label><input class="form-control" type="text" id="customCourseInstanceContainer" placeholder=".course-session, .course-offering, .instance-item, .session-details" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'>     <strong class='text-success'><i class='bi bi-diagram-3-fill me-1'></i>Multi-Instance Detection (Advanced)</strong><hr class='my-1'>     <p class='mb-1 small'>         <strong>Only fill this field if</strong> a single course on your page lists <u>multiple</u> sessions with different dates, locations, or instructors.     </p>     <p class='mb-0 small text-muted'>         <i class='bi bi-info-circle me-1 text-success'></i>This allows the tool to extract each session individually. If left empty, the tool will assume only one session per course.     </p>     <hr class='my-1'>     <strong class='small text-primary'>Default selectors include:</strong>     <ul class='list-unstyled small mb-0 ps-3'>         <li><code>.course-session</code></li>         <li><code>.course-offering</code></li>         <li><code>.instance-item</code></li>         <li><code>.session-details</code></li>     </ul> </div>"></div>
+                                <hr class="my-3">
+                                <h4 class="text-success-emphasis mb-2 h6">Provider Information</h4>
+                                <div class="input-group input-group-sm"><label class="input-group-text" for="customCourseProvider">Provider</label><input class="form-control" type="text" id="customCourseProvider" placeholder=".course-provider, .instructor, [itemprop='provider']" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'>     <strong class='text-success'>Provider / University Selector</strong><hr class='my-1'>     <p class='mb-0 small'>Selector for the element with the name of the organization or person providing the course.</p>     <hr class='my-1'><strong class='small text-primary'>Default selectors include:</strong>     <ul class='list-unstyled small mb-0 ps-3'><li><code>.course-provider</code></li><li><code>.instructor</code></li><li><code>[itemprop='provider']</code></li></ul> </div>"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 id="headingJobPosting" class="accordion-header h2"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseJobPosting"><span class="text-primary me-2 bi bi-briefcase-fill" aria-hidden="true"></span> Job Posting Identifiers</button></h3>
+                        <div id="collapseJobPosting" class="accordion-collapse collapse" data-bs-parent="#customIdentifiersAccordion">
+                            <div class="accordion-body">
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customJobContainer">Job Container</label><input class="form-control" type="text" id="customJobContainer" placeholder=".job-opening, [itemtype='schema.org/JobPosting']" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'>            <strong class='text-warning'>Main Job Posting Container</strong>            <hr class='my-1'>            <p class='mb-1 small'>Enter the CSS selector for the main element that wraps the <u>entire</u> job posting (title, description, location, etc.).</p>            <p class='mb-0 small'>                <i class='bi bi-bullseye me-1 text-success'></i>This helps the tool focus its analysis for maximum accuracy.            </p>            <hr class='my-1'>            <strong class='small text-primary'>Default selectors include:</strong>            <ul class='list-unstyled small mb-0 ps-3'>                <li><code>.job-opening</code></li>                <li><code>[itemtype*='schema.org/JobPosting']</code></li>            </ul>        </div>"></div>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customJobTitle">Job Title</label><input class="form-control" type="text" id="customJobTitle" placeholder=".job-title, h1, h2, h3" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'>            <strong class='text-warning'>Job Title Selector</strong>            <hr class='my-1'>            <p class='mb-1 small'>Enter the CSS selector for the element containing the job's title.</p>            <hr class='my-1'>            <strong class='text-primary small'>Default selectors include:</strong>            <ul class='list-unstyled small mb-0 ps-3'>                <li><code>.job-title</code> (Recommended)</li>                <li><code>h1</code>, <code>h2</code>, or <code>h3</code> (Common fallbacks)</li>            </ul>        </div>"></div>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customJobIdentifier">Job ID (Selector)</label><input class="form-control" type="text" id="customJobIdentifier" placeholder="ex: .job-id, [itemprop='identifier']" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'>                       <strong>Job Identifier (Optional)</strong>                       <hr class='my-1'>                       <p class='mb-1 small'>Enter the CSS selector for the element containing the unique job ID or requisition number (ex: 'AB-123').</p>                       <p class='mb-0 small'>                           <i class='bi bi-magic me-1'></i>The tool will try to auto-detect this.                       </p>                   </div>"></div>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customJobDatePosted">Date Posted</label><input class="form-control" type="text" id="customJobDatePosted" placeholder=".date-posted, .posted-on, time[itemprop='datePosted']" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'>            <strong class='text-warning'>Date Posted Selector</strong>            <hr class='my-1'>            <p class='mb-1 small'>Enter the CSS selector for the element containing the job's publication date.</p>            <p class='mb-0 small'>                <i class='bi bi-calendar-check text-success me-1'></i>The tool is smart and can understand most common date formats (ex: <span class='text-warning'>November 10, 2025</span> or <span class='text-warning'>2025-11-10</span>).            </p>            <hr class='my-1'>            <strong class='text-primary small'>Best practice:</strong> Use a <code>&amp;lt;time&amp;gt;</code> element with a <code>datetime</code> attribute.        </div>"></div>
+                                <hr class="my-3">
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customJobLocationType">Location Type</label><select class="form-select" id="customJobLocationType" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'>            <strong class='text-warning'>Select the Job's Location Model</strong>            <hr class='my-1'>            <ul class='list-unstyled small mb-0'>                <li class='mb-1'>                    <i class='bi bi-building me-1 text-primary'></i>                    <strong class='text-success'>Physical:</strong> For jobs at a specific office address.                </li>                <li class='mb-1'>                    <i class='bi bi-globe me-1 text-primary'></i>                    <strong class='text-success'>Remote:</strong> For telecommute jobs with no physical office requirement.                </li>                <li>                    <i class='bi bi-shuffle me-1 text-primary'></i>                    <strong class='text-success'>Hybrid:</strong> For jobs that mix remote work with on-site presence.                </li>            </ul>        </div>">
+                                        <option value="physical" selected="">Physical Address</option>
+                                        <option value="remote">Remote</option>
+                                        <option value="hybrid">Hybrid</option>
+                                    </select></div>
+                                <div id="physicalLocationFields">
+                                    <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customJobStreetAddress">Street Address</label><input class="form-control" type="text" id="customJobStreetAddress" placeholder="Auto-detected or enter manually..." autocomplete="street-address" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'>            <strong class='text-warning'>Street Address</strong>            <hr class='my-1'>            <p class='mb-1 small'>The street address for the physical job location.</p>            <p class='mb-0 small'>                <i class='bi bi-magic text-success me-1'></i>This field is auto-filled if detected, but you can always override the value.            </p>            <hr class='my-1'>            <strong class='text-primary small'>Auto-detects via:</strong>            <ul class='list-unstyled small mb-0 ps-3'>                <li><code>.street-address</code></li>                <li><code>.address-line1</code></li>                <li><code>[itemprop='streetAddress']</code></li>            </ul>        </div>"></div>
+                                    <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customJobAddressLocality">City</label><input class="form-control" type="text" id="customJobAddressLocality" placeholder="Auto-detected or enter manually..." autocomplete="address-level2" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'>            <strong class='text-warning'>City / Locality</strong>            <hr class='my-1'>            <p class='mb-1 small'>The city (or locality) for the physical job location.</p>            <p class='mb-0 small'>                <i class='bi bi-magic text-success me-1'></i>This field is auto-filled if detected, but you can always override the value.            </p>            <hr class='my-1'>            <strong class='text-primary small'>Auto-detects via:</strong>            <ul class='list-unstyled small mb-0 ps-3'>                <li><code>.city</code></li>                <li><code>.locality</code></li>                <li><code>[itemprop='addressLocality']</code></li>            </ul>        </div>"></div>
+                                    <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customJobAddressRegion">State / Region</label><input class="form-control" type="text" id="customJobAddressRegion" placeholder="Auto-detected or enter manually..." autocomplete="address-level1" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'>            <strong class='text-warning'>State / Region</strong>            <hr class='my-1'>            <p class='mb-1 small'>The state, region, or province for the physical job location.</p>            <p class='mb-0 small'>                <i class='bi bi-magic text-success me-1'></i>This field is auto-filled if detected, but you can always override the value.            </p>            <hr class='my-1'>            <strong class='text-primary small'>Auto-detects via:</strong>            <ul class='list-unstyled small mb-0 ps-3'>                <li><code>.state</code></li>                <li><code>.region</code></li>                <li><code>[itemprop='addressRegion']</code></li>            </ul>        </div>"></div>
+                                    <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customJobPostalCode">Postal Code</label><input class="form-control" type="text" id="customJobPostalCode" placeholder="Auto-detected or enter manually..." autocomplete="postal-code" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'>            <strong class='text-warning'>Postal / ZIP Code</strong>            <hr class='my-1'>            <p class='mb-1 small'>The postal or ZIP code for the physical job location.</p>            <p class='mb-0 small'>                <i class='bi bi-magic text-success me-1'></i>This field is auto-filled if detected, but you can always override the value.            </p>            <hr class='my-1'>            <strong class='text-primary small'>Auto-detects via:</strong>            <ul class='list-unstyled small mb-0 ps-3'>                <li><code>.postal-code</code></li>                <li><code>.zip-code</code></li>                <li><code>[itemprop='postalCode']</code></li>            </ul>        </div>"></div>
+                                    <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customJobAddressCountry">Country</label><input class="form-control" type="text" id="customJobAddressCountry" placeholder="Auto-detected or enter manually..." autocomplete="country" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'>            <strong class='text-warning'>Country</strong>            <hr class='my-1'>            <p class='mb-1 small'>The country for the physical job location.</p>            <p class='mb-0 small'>                <i class='bi bi-magic text-success me-1'></i>This field is auto-filled if detected, but you can always override the value.            </p>            <hr class='my-1'>            <strong class='text-primary small'>Auto-detects via:</strong>            <ul class='list-unstyled small mb-0 ps-3'>                <li><code>.country</code></li>                <li><code>.country-name</code></li>                <li><code>[itemprop='addressCountry']</code></li>            </ul>        </div>"></div>
+                                </div>
+                                <div id="remoteLocationFields" style="display:none;">
+                                    <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customJobApplicantCountry">Applicant Country</label><input class="form-control" type="text" id="customJobApplicantCountry" placeholder="Auto-detected or enter manually..." data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'>                           <strong class='text-warning'>Required for Remote Jobs.</strong><hr class='my-1'>                           <p class='mb-1'>Specify the country the applicant must be in <span class='text-success'>(ex: 'USA').</span></p>                           <p class='mb-0 small'>                               <span class='bi bi-magic me-1 text-primary' aria-hidden='true'></span>The tool will try to auto-fill this, but you have the final say.</p></div>"></div>
+                                </div>
+                                <hr>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customJobSalarySelector">Salary (Selector)</label><input class="form-control" type="text" id="customJobSalarySelector" placeholder=".salary, .compensation-package, [itemprop='baseSalary']" data-bs-placement="top" data-bs-toggle="tooltip" title="<div class='text-start'>                   Enter the CSS selector for the element with the salary text.                   <hr class='my-1'>                   <strong class='small'>Supported selectors include:</strong>                   <ul class='list-unstyled small mb-0'>                       <li><i class='bi bi-check-circle-fill text-success me-1'></i><code>.salary</code></li>                       <li><i class='bi bi-check-circle-fill text-success me-1'></i><code>.compensation-package</code></li>                       <li><i class='bi bi-check-circle-fill text-success me-1'></i><code>[itemprop='baseSalary']</code></li>                   </ul>               </div>"></div>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customJobSalaryValue">Salary (Manual)</label><input class="form-control" type="text" id="customJobSalaryValue" placeholder="ex: 80000 or 80000-95000" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'>                       <strong class='text-warning'><i class='bi bi-keyboard-fill me-1'></i>Manual Override</strong>                       <hr class='my-1'>                       <p class='mb-1'>Enter a single numeric value (<code>95000</code>) or a range (<code>80000-95000</code>).</p>                       <p class='mb-0 small'>                           This field has the highest priority and overrides any auto-detected salary.                       </p>                   </div>"></div>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customJobValidThrough">Valid Through</label><input class="form-control" id="customJobValidThrough" type="date" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'>            <strong class='text-primary'>Application Closing Date</strong>            <hr class='my-1'>            <p class='mb-1'>Set the final date for job applications.</p>            <p class='mb-0 small'>                <i class='bi bi-magic text-success me-1'></i>If left blank, the tool will automatically set it to <strong>30 days</strong> after the 'Date Posted'.            </p>        </div>"></div>
+                                <div class="input-group input-group-sm"><label class="input-group-text" for="customJobEmploymentType">Employment Type</label><select class="form-select" id="customJobEmploymentType" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'>            <strong class='text-primary'>Type of Employment</strong>            <hr class='my-1'>            <p class='mb-1'>Select the option that best describes the role.</p>            <p class='mb-0 small'>                <i class='bi bi-cpu-fill text-success me-1'></i>The tool tries to auto-detect this from the page content. 'Full-time' is used as a safe default if nothing is detected.            </p>        </div>">
+                                        <option value="FULL_TIME" selected="">Full-time</option>
+                                        <option value="PART_TIME">Part-time</option>
+                                        <option value="CONTRACTOR">Contractor</option>
+                                        <option value="TEMPORARY">Temporary</option>
+                                        <option value="INTERN">Intern</option>
+                                        <option value="VOLUNTEER">Volunteer</option>
+                                        <option value="PER_DIEM">Per Diem</option>
+                                        <option value="OTHER">Other</option>
+                                    </select></div>
+                                <div class="ms-2 my-3 form-switch form-check"><input type="checkbox" id="customJobDirectApply" class="form-check-input" role="switch"><label class="form-check-label" for="customJobDirectApply"> Enable Direct Apply <span class="text-primary ms-1 bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip" data-bs-placement="right" title="<div class='text-start'><strong class='text-warning'>Direct Apply Experience</strong><hr class='my-1'><p class='mb-1 small'>Check this if users can apply directly on your page without:</p><ul class='small mb-0 ps-3'><li>Multiple login steps</li><li>Redirects to external sites</li><li>Complex multi-page forms</li></ul><p class='mb-0 small text-muted mt-2'>This improves your job's visibility in Google Search.</p></div>"></span></label></div>
+                                <hr class="mt-3">
+                                <h4 class="text-success-emphasis mb-2 h6">Experience &amp; Education (Beta)</h4>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customJobExperienceSelector">Exp. (Selector)</label><input class="form-control savable-input" type="text" id="customJobExperienceSelector" placeholder="ex: .experience-years" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'>                       <strong>Experience Requirements (Selector)</strong>                       <hr class='my-1'>                       <p class='mb-1 small'>Selector for text describing experience, like '3+ years of experience'. The tool will try to extract the number of months.</p>                   </div>"></div>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customJobExperienceValue">Months of Exp.</label><input class="form-control savable-input" type="number" id="customJobExperienceValue" placeholder="ex: 36" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'>                       <strong>Manual Override for Experience</strong>                       <hr class='my-1'>                       <p class='mb-0 small'>Enter the required experience in <strong>months</strong> (ex: 3 years = 36).</p>                   </div>"></div>
+                                <div class="input-group input-group-sm mt-3 mb-2"><label class="input-group-text" for="customJobEducationSelector">Edu (Selector)</label><input class="form-control savable-input" type="text" id="customJobEducationSelector" placeholder="ex: .education-level" data-bs-toggle="tooltip" data-bs-placement="top" title="<div class='text-start'>                       <strong>Education Requirements (Selector)</strong>                       <hr class='my-1'>                       <p class='mb-0 small'>Selector for text describing the required education level, like 'Bachelor's degree'.</p>                   </div>"></div>
+                                <div class="input-group input-group-sm"><label class="input-group-text" for="customJobEducationValue">Edu (Manual)</label><select class="form-select savable-input" id="customJobEducationValue">
+                                        <option value="" selected="">-- Select Override --</option>
+                                        <option value="high school">High School</option>
+                                        <option value="associate degree">Associate Degree</option>
+                                        <option value="bachelor degree">Bachelor Degree</option>
+                                        <option value="professional certificate">Professional Certificate</option>
+                                        <option value="postgraduate degree">Postgraduate Degree</option>
+                                    </select></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 id="headingSoftwareApp" class="accordion-header h2"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSoftwareApp"><span class="text-primary me-2 bi bi-app-indicator" aria-hidden="true"></span> Software App Identifiers</button></h3>
+                        <div id="collapseSoftwareApp" class="accordion-collapse collapse" data-bs-parent="#customIdentifiersAccordion">
+                            <div class="accordion-body">
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customAppContainer">App Container</label><input class="form-control" type="text" id="customAppContainer" placeholder=".software-info, [itemtype='schema.org/SoftwareApplication']" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector for the main container wrapping the software's details.<br>Supported selectors include: <span class='text-success'>class.software-info</span> or <span class='text-success'>[itemtype='schema.org/SoftwareApplication']</span>"></div>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customAppName">App Name</label><input class="form-control" type="text" id="customAppName" placeholder=".app-title, h1, h2, h3" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector for the element containing the software's name.<br>Supported selectors include: <span class='text-success'>class.app-title</span> or <span class='text-success'>h1, h2, h3</span>"></div>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customAppRating">Rating</label><input class="form-control" type="text" id="customAppRating" placeholder=".rating, [itemprop='ratingValue']" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector for the element containing the software's rating.<br>Supported selectors include: <span class='text-success'>class.rating</span> or <span class='text-success'>[itemprop='ratingValue']</span>"></div>
+                                <hr class="my-3">
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customAppPrice">Price</label><input class="form-control" type="text" id="customAppPrice" placeholder=".app-price, .software-price" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector for the element containing the software's price.<br>Supported selectors include: <span class='text-success'>class.app-price</span> or <span class='text-success'>.software-price</span>"></div>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customAppCategory">Category</label><input class="form-control" type="text" id="customAppCategory" placeholder=".app-category, [itemprop='applicationCategory']" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector for the element containing the software's category.<br>Supported selectors include: <span class='text-success'>class.app-category</span> or <span class='text-success'>[itemprop='applicationCategory']</span>"></div>
+                                <div class="input-group input-group-sm"><label class="input-group-text" for="customAppOs">Operating Sys.</label><input class="form-control" type="text" id="customAppOs" placeholder=".app-os, .platform, [itemprop='operatingSystem']" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector for the element containing the software's operating system.<br>Supported selectors include: <span class='text-success'>class.app-os</span> or <span class='text-success'>.platform</span> or <span class='text-success'>[itemprop='operatingSystem']</span>"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 id="headingFaq" class="accordion-header h2"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFaq"><span class="text-primary me-2 bi bi-patch-question-fill" aria-hidden="true"></span> FAQ Identifiers</button></h3>
+                        <div id="collapseFaq" class="accordion-collapse collapse" data-bs-parent="#customIdentifiersAccordion">
+                            <div class="accordion-body">
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customFaqItem">FAQ Container</label><input class="form-control" type="text" id="customFaqItem" placeholder=".faq-item, .accordion-item, .qa-item" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector that targets the container wrapping a single Q&amp;A pair.<br>Supported selectors include: <span class='text-success'>class.faq-item</span> or <span class='text-success'>.accordion-item</span> or <span class='text-success'>.qa-item</span>"></div>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customFaqQuestion">Question</label><input class="form-control" type="text" id="customFaqQuestion" placeholder=".question, .faq-q, .accordion-button, .query-title" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector that targets the element containing the question text.<br>Supported selectors include: <span class='text-success'>class.question</span> or <span class='text-success'>.faq-q</span> or <span class='text-success'>.accordion-button</span> or <span class='text-success'>.query-title</span>"></div>
+                                <div class="input-group input-group-sm"><label class="input-group-text" for="customFaqAnswer">Answer</label><input class="form-control" type="text" id="customFaqAnswer" placeholder=".answer, .faq-a, .accordion-body, .response-text" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector that targets the element containing the answer text.<br>Supported selectors include: <span class='text-success'>class.answer</span> or <span class='text-success'>.faq-a</span> or <span class='text-success'>.accordion-body</span> or <span class='text-success'>.response-text</span>"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 id="headingRecipe" class="accordion-header h2"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRecipe"><span class="text-primary me-2 bi bi-egg-fried" aria-hidden="true"></span> Recipe Identifiers</button></h3>
+                        <div id="collapseRecipe" class="accordion-collapse collapse" data-bs-parent="#customIdentifiersAccordion">
+                            <div class="accordion-body">
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customRecipeContainer">Recipe Container</label><input class="form-control" type="text" id="customRecipeContainer" placeholder=".recipe-card, [itemtype*='schema.org/Recipe']" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector that targets the container wrapping the full recipe content.<br>Supported selectors include: <span class='text-success'>class.recipe-card</span> or <span class='text-success'>[itemtype='schema.org/Recipe']</span>"></div>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customRecipeName">Recipe Name</label><input class="form-control" type="text" id="customRecipeName" placeholder=".recipe-title, h1, h2, h3" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector that targets the element containing the recipe name.<br>Supported selectors include: <span class='text-success'>class.recipe-title</span> or <span class='text-success'>h1, h2, h3</span>"></div>
+                                <hr class="my-3">
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customRecipePrepTime">Prep Time</label><input class="form-control" type="text" id="customRecipePrepTime" placeholder=".prep-time, [itemprop='prepTime']" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector that targets the element containing the preparation time.<br>Supported selectors include: <span class='text-success'>class.prep-time</span> or <span class='text-success'>[itemprop='prepTime']</span>"></div>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customRecipeCookTime">Cook Time</label><input class="form-control" type="text" id="customRecipeCookTime" placeholder=".cook-time, [itemprop='cookTime']" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector that targets the element containing the cooking time.<br>Supported selectors include: <span class='text-success'>class.cook-time</span> or <span class='text-success'>[itemprop='cookTime']</span>"></div>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customRecipeIngredients">Ingredients (LI)</label><input class="form-control" type="text" id="customRecipeIngredients" placeholder=".ingredients li, [itemprop='recipeIngredient']" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector that targets the elements containing the recipe ingredients.<br>Supported selectors include: <span class='text-success'>class.ingredients li</span> or <span class='text-success'>[itemprop='recipeIngredient']</span>"></div>
+                                <div class="input-group input-group-sm"><label class="input-group-text" for="customRecipeInstructions">Instructions (LI)</label><input class="form-control" type="text" id="customRecipeInstructions" placeholder=".instructions li, .recipe-instructions li, [itemprop='recipeInstructions']" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector that targets the elements containing the recipe instructions.<br>Supported selectors include: <span class='text-success'>class.instructions li</span> or <span class='text-success'>.recipe-instructions li</span> or <span class='text-success'>[itemprop='recipeInstructions']</span>"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 id="headingHowTo" class="accordion-header h2"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHowTo"><span class="text-primary me-2 bi bi-list-ol" aria-hidden="true"></span> How-To Identifiers</button></h3>
+                        <div id="collapseHowTo" class="accordion-collapse collapse" data-bs-parent="#customIdentifiersAccordion">
+                            <div class="accordion-body">
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customHowToContainer">How-To Container</label><input class="form-control" type="text" id="customHowToContainer" placeholder=".howto-guide, [itemtype*='schema.org/HowTo']" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector that targets the main How-To container wrapping the entire instructional content.<br>Supported selectors include: <span class='text-success'>class.howto-guide</span> or <span class='text-success'>[itemtype='schema.org/HowTo']</span>"></div>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customHowToName">How-To Name</label><input class="form-control" type="text" id="customHowToName" placeholder=".howto-title, h1, h2, h3" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector that targets the element containing the How-To name or title.<br>Supported selectors include: <span class='text-success'>class.howto-title</span> or <span class='text-success'>h1, h2, h3</span>"></div>
+                                <hr class="my-3">
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customHowToStep">Step Container</label><input class="form-control" type="text" id="customHowToStep" placeholder=".step, .howto-step, [itemprop='step']" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector that targets the container wrapping a single How-To step.<br>Supported selectors include: <span class='text-success'>class.step</span> or <span class='text-success'>.howto-step</span> or <span class='text-success'>[itemprop='step']</span>"></div>
+                                <div class="input-group input-group-sm"><label class="input-group-text" for="customHowToText">Step Text</label><input class="form-control" type="text" id="customHowToText" placeholder=".step-text, .howto-text, [itemprop='text']" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector that targets the element containing the step instruction text.<br>Supported selectors include: <span class='text-success'>class.step-text</span> or <span class='text-success'>.howto-text</span> or <span class='text-success'>[itemprop='text']</span>"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 id="headingBreadcrumb" class="accordion-header h2"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBreadcrumb"><span class="text-primary me-2 bi bi-signpost-split-fill" aria-hidden="true"></span> Breadcrumb Identifiers</button></h3>
+                        <div id="collapseBreadcrumb" class="accordion-collapse collapse" data-bs-parent="#customIdentifiersAccordion">
+                            <div class="accordion-body">
+                                <div class="input-group input-group-sm"><label class="input-group-text" for="customBreadcrumbItem">Item (LI)</label><input class="form-control" type="text" id="customBreadcrumbItem" placeholder=".breadcrumb li, .breadcrumbs li, nav[aria-label='breadcrumb'] ol li" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector that targets each breadcrumb list item.<br>Supported selectors include: <span class='text-success'>class.breadcrumb li</span> or <span class='text-success'>.breadcrumbs li</span> or <span class='text-success'>nav[aria-label='breadcrumb'] ol li</span>"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 id="headingEvent" class="accordion-header h2"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEvent"><span class="text-primary me-2 bi bi-calendar-event-fill" aria-hidden="true"></span> Event Identifiers</button></h3>
+                        <div id="collapseEvent" class="accordion-collapse collapse" data-bs-parent="#customIdentifiersAccordion">
+                            <div class="accordion-body">
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customEventName">Event Name</label><input class="form-control" type="text" id="customEventName" placeholder=".event-title, h1, h2, h3" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector that targets the element containing the event name.<br>Supported selectors include: <span class='text-success'>class.event-title</span> or <span class='text-success'>h1, h2, h3</span>"></div>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customEventStartDate">Start Date</label><input class="form-control" type="text" id="customEventStartDate" placeholder=".event-start-date, [itemprop='startDate']" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector that targets the element containing the event start date.<br>Supported selectors include: <span class='text-success'>class.event-start-date</span> or <span class='text-success'>[itemprop='startDate']</span>"></div>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customEventLocation">Location</label><input class="form-control" type="text" id="customEventLocation" placeholder=".location, .venue, [itemprop='location']" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector that targets the element containing the event location.<br>Supported selectors include: <span class='text-success'>class.location</span> or <span class='text-success'>.venue</span> or <span class='text-success'>[itemprop='location']</span>"></div>
+                                <div class="input-group input-group-sm"><label class="input-group-text" for="customEventOrganizer">Organizer</label><input class="form-control" type="text" id="customEventOrganizer" placeholder=".organizer, [itemprop='organizer']" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector that targets the element containing the event organizer.<br>Supported selectors include: <span class='text-success'>class.organizer</span> or <span class='text-success'>[itemprop='organizer']</span>"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 id="headingOrg" class="accordion-header h2"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOrg"><span class="text-primary me-2 bi bi-building-fill" aria-hidden="true"></span> Organization Identifiers</button></h3>
+                        <div id="collapseOrg" class="accordion-collapse collapse" data-bs-parent="#customIdentifiersAccordion">
+                            <div class="accordion-body">
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customOrgLogo">Logo (URL)</label><input class="form-control" type="text" id="customOrgLogo" placeholder=".logo, img[src*='logo'], img[alt*='logo']" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector for the element containing the organization's logo.<br>Supported selectors include:  <span class='text-success'>class.logo</span> or <span class='text-success'>img[src='logo']</span> or <span class='text-success'>img[alt='logo']</span>"></div>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customOrgAddress">Address</label><input class="form-control" type="text" id="customOrgAddress" placeholder=".address, .contact-address, footer address" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector for the element containing the organization's address.<br>Supported selectors include: <span class='text-success'>class.address</span> or <span class='text-success'>.contact-address</span> or <span class='text-success'>footer address</span>"></div>
+                                <div class="input-group input-group-sm"><label class="input-group-text" for="customOrgTelephone">Telephone</label><input class="form-control" type="text" id="customOrgTelephone" placeholder="a[href='tel:']" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector for the element containing the organization's telephone number.<br>Supported selectors include: <span class='text-success'>a[href='tel:']</span>"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 id="headingLocalBusiness" class="accordion-header h2"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLocalBusiness"><span class="text-primary me-2 bi bi-shop-window" aria-hidden="true"></span> Local Business Identifiers</button></h3>
+                        <div id="collapseLocalBusiness" class="accordion-collapse collapse" data-bs-parent="#customIdentifiersAccordion">
+                            <div class="accordion-body">
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customBizPriceRange">Price Range</label><input class="form-control" type="text" id="customBizPriceRange" placeholder=".price-range, [itemprop='priceRange']" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector for the element containing the business's price range.<br>Supported selectors include: <span class='text-success'>class.price-range</span> or <span class='text-success'>[itemprop='priceRange']</span>"></div>
+                                <div class="input-group input-group-sm"><label class="input-group-text" for="customBizOpeningHours">Opening Hours</label><input class="form-control" type="text" id="customBizOpeningHours" placeholder=".opening-hours, .hours-of-operation, [itemprop='openingHours']" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector for the element containing the business's opening hours.<br>Supported selectors include: <span class='text-success'>class.opening-hours</span> or <span class='text-success'>.hours-of-operation</span> or <span class='text-success'>[itemprop='openingHours']</span>"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 id="headingVideo" class="accordion-header h2"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseVideo"><span class="text-primary me-2 bi bi-film" aria-hidden="true"></span> Video Identifiers</button></h3>
+                        <div id="collapseVideo" class="accordion-collapse collapse" data-bs-parent="#customIdentifiersAccordion">
+                            <div class="accordion-body">
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customVideoContainer">Video Container</label><input class="form-control" type="text" id="customVideoContainer" placeholder=".video-spotlight, .video-player-container, [itemtype='schema.org/VideoObject']" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector for the main container wrapping the video and its details.<br>Supported selectors include: <span class='text-success'>class.video-spotlight</span> or <span class='text-success'>.video-player-container</span> or <span class='text-success'>[itemtype='schema.org/VideoObject']</span>"></div>
+                                <hr class="my-3">
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customVideoName">Video Title</label><input class="form-control" type="text" id="customVideoName" placeholder=".video-title, h1, h2, h3" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector for the element containing the video's title.<br>Supported selectors include: <span class='text-success'>class.video-title</span> or <span class='text-success'>h1, h2, h3</span>"></div>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customVideoDesc">Description</label><input class="form-control" type="text" id="customVideoDesc" placeholder=".video-description, .lead, [data-card-text]" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector for the element containing the video's description.<br>Supported selectors include: <span class='text-success'>class.video-description</span> or <span class='text-success'>.lead</span> or <span class='text-success'>[data-card-text]</span>"></div>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customVideoThumb">Thumbnail URL</label><input class="form-control" type="text" id="customVideoThumb" placeholder="video[poster], .video-thumb img, .video-spotlight img, [data-video-id] img" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector for the video's thumbnail image.<br>Supported selectors include: <span class='text-success'>video[poster]</span> or <span class='text-success'>.video-thumb img</span> or <span class='text-success'>.video-spotlight img</span> or <span class='text-success'>[data-video-id] img</span>"></div>
+                                <div class="input-group input-group-sm mb-2"><label class="input-group-text" for="customVideoUrl">Content URL</label><input class="form-control" type="text" id="customVideoUrl" placeholder="video > source, iframe[src='youtube'], iframe[src='vimeo'], [data-video-id]" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector for the element containing the video's content URL.<br>Supported selectors include: <span class='text-success'>video > source</span> or <span class='text-success'>iframe[src='youtube']</span> or <span class='text-success'>iframe[src='vimeo']</span> or <span class='text-success'>[data-video-id]</span>"></div>
+                                <div class="input-group input-group-sm"><label class="input-group-text" for="customVideoDate">Upload Date</label><input class="form-control" type="text" id="customVideoDate" placeholder="time[datetime], .upload-date, [itemprop='uploadDate']" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter the CSS selector for the element containing the video's upload date.<br>Supported selectors include: <span class='text-success'>time[datetime]</span> or <span class='text-success'>.upload-date</span> or <span class='text-success'>[itemprop='uploadDate']</span>"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 bg-body-tertiary order-lg-last p-4 px-2">
+                <h2 class="text-center text-success-emphasis mb-4 h4"><span class="text-primary me-2 bi bi-file-earmark-code-fill" aria-hidden="true"></span> Final Output (JSON-LD)</h2>
+                <div class="card shadow-sm">
+                    <div class="card-header d-block justify-content-center m-auto px-0">
+                        <div class="btn-group gap-1" role="group"><button class="btn btn-success btn-sm disabled" id="copyBtn" disabled=""><span class="text-primary-emphasis me-1 bi bi-clipboard-check" aria-hidden="true"></span> Copy </button><button class="btn btn-secondary btn-sm disabled" id="downloadBtn" disabled=""><span class="text-primary-emphasis me-1 bi bi-download" aria-hidden="true"></span> Download </button><button class="btn btn-info btn-sm disabled" id="validateBtn" disabled=""><span class="text-primary-emphasis me-1 bi bi-google" aria-hidden="true"></span> Validate </button></div>
+                    </div>
+                    <div class="card-body p-0"><textarea class="border-0 form-control" id="generatedCode" placeholder="Code will appear here..." rows="20"></textarea></div>
+                </div>
+                <div class="d-grid mt-3"><button class="btn btn-warning btn-lg" id="copyEnhancedPromptBtn" type="button"><span class="me-2 bi bi-robot" aria-hidden="true"></span> Copy Full Enhancement Prompt </button></div>
+                <div class="mt-4" id="sge-preview" style="display:none;">
+                    <h3 class="text-success-emphasis mb-3 h6"><span class="text-warning me-2 bi bi-stars" aria-hidden="true"></span>Potential Google SGE Preview</h3>
+                    <div id="sge-preview-content"></div>
+                    <div class="alert alert-info mt-2 small" role="alert"><span class="text-primary me-2 bi bi-robot" aria-hidden="true"></span><span>This is a conceptual preview of how Google might use this structured data to generate direct answers.</span></div>
+                </div>
+            </div>
+            <div class="col-lg-5 p-4">
+                <h2 class="text-center text-success-emphasis mb-3 h4"><span class="text-primary me-2 bi bi-diagram-3-fill" aria-hidden="true"></span> Content &amp; Entity Analysis</h2>
+                <div id="analysisResults" style="max-height:230vh;overflow-y:auto;" aria-live="polite">
+                    <div class="text-center d-flex h-100 flex-column justify-content-center align-items-center p-5">
+                        <h3 class="font-monospace lh-1 text-success">The Fastest Path<br>to a Structured Web</h3>
+                        <lottie-player class="img-fluid lottie-welcome" src="https://assets9.lottiefiles.com/packages/lf20_PBgNop.json" loop="" aria-label="Animation showing the transition from menus to dialogue" preload="metadata" role="img" speed="2" hover=""></lottie-player>
+                        <p class="lead fs-5 text-primary text-opacity-50">We envision a web where every page is instantly transformed into clean, machine-readable structure.<br>Our tool eliminates the friction between raw content and structured data, enabling search engines, AI systems, and users to access knowledge with precision.<br>By automating schema generation directly from webpages, we accelerate the journey toward a more intelligent, answer-ready internet.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="bg-warning-subtle border-primary border-opacity-25 d-flex justify-content-center border-top">
+            <div class="dropup"><button class="btn btn-outline-link rounded-pill shadow-lg" id="helpMenuButton" type="button" data-bs-toggle="dropdown" aria-expanded="false"><span class="text-primary me-2 bi bi-question-circle-fill" aria-hidden="true"></span> Tool Guide (Docs) </button>
+                <ul class="shadow-lg dropdown-menu" id="help-menu-items" aria-labelledby="helpMenuButton">
+                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#helpModal" data-help-topic="faq-identifiers" data-help-title="Expert Guide: FAQ Identifiers"><span class="me-2 bi bi-patch-question-fill" aria-hidden="true"></span>FAQ Identifiers </a></li>
+                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#helpModal" data-help-topic="product-identifiers" data-help-title="Expert Guide: Product Identifiers"><span class="me-2 bi bi-box-seam-fill" aria-hidden="true"></span>Product Identifiers </a></li>
+                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#helpModal" data-help-topic="recipe-identifiers" data-help-title="Expert Guide: Recipe Identifiers"><span class="me-2 bi bi-egg-fried" aria-hidden="true"></span>Recipe Identifiers </a></li>
+                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#helpModal" data-help-topic="review-identifiers" data-help-title="Expert Guide: Review Identifiers"><span class="me-2 bi bi-star-fill" aria-hidden="true"></span>Review Identifiers </a></li>
+                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#helpModal" data-help-topic="howto-identifiers" data-help-title="Expert Guide: How-To Identifiers"><span class="me-2 bi bi-list-ol" aria-hidden="true"></span>How-To Identifiers </a></li>
+                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#helpModal" data-help-topic="breadcrumb-identifiers" data-help-title="Expert Guide: Breadcrumb Identifiers"><span class="me-2 bi bi-signpost-split-fill" aria-hidden="true"></span>Breadcrumb Identifiers </a></li>
+                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#helpModal" data-help-topic="event-identifiers" data-help-title="Expert Guide: Event Identifiers"><span class="me-2 bi bi-calendar-event-fill" aria-hidden="true"></span>Event Identifiers </a></li>
+                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#helpModal" data-help-topic="organization-identifiers" data-help-title="Expert Guide: Organization Identifiers"><span class="me-2 bi bi-building-fill" aria-hidden="true"></span>Organization Identifiers </a></li>
+                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#helpModal" data-help-topic="video-identifiers" data-help-title="Expert Guide: Video Identifiers"><span class="me-2 bi bi-film" aria-hidden="true"></span>Video Identifiers </a></li>
+                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#helpModal" data-help-topic="localbusiness-identifiers" data-help-title="Expert Guide: Local Business Identifiers"><span class="me-2 bi bi-shop-window" aria-hidden="true"></span>Local Business Identifiers </a></li>
+                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#helpModal" data-help-topic="jobposting-identifiers" data-help-title="Expert Guide: Job Posting Identifiers"><span class="me-2 bi bi-briefcase-fill" aria-hidden="true"></span>Job Posting Identifiers </a></li>
+                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#helpModal" data-help-topic="softwareapplication-identifiers" data-help-title="Expert Guide: Software App Identifiers"><span class="me-2 bi bi-app-indicator" aria-hidden="true"></span>Software App Identifiers </a></li>
+                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#helpModal" data-help-topic="course-identifiers" data-help-title="Expert Guide: Course Identifiers"><span class="me-2 bi bi-mortarboard-fill" aria-hidden="true"></span>Course Identifiers </a></li>
+                </ul>
+            </div>
+        </div>
+    </main>
+    <div class="modal fade" role="dialog" tabindex="-1" id="empModal" aria-labelledby="empModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="text-success-emphasis modal-title h5" id="empModalLabel"><span class="text-primary me-2 bi bi-buildings-fill" aria-hidden="true"></span>Entity Management Platform (EMP)</h3><button class="btn-close ms-auto me-0" aria-label="Close" data-bs-dismiss="modal" type="button"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="small">Enter your brand's core, authoritative data here. This information will be used automatically to enrich the generated schema.</p>
+                    <div id="emp-form-container"></div><!-- ========== START: TEMPLATE FOR LOYALTY PROGRAM UI IN EMP ========== -->
+<template id="loyaltyProgramTemplate">
+    <div class="mt-4 pt-3 border-top">
+        <h5 class="mb-3 text-success-emphasis"><span class="bi bi-gem me-2 text-primary"></span>Loyalty Program (MemberProgram)</h5>
+        <div class="input-group mb-2">
+            <span class="input-group-text" style="width: 150px;">Program Name</span>
+            <input type="text" class="form-control" id="empLoyaltyProgramName" placeholder="ex: MyBrand Rewards">
+        </div>
+        
+        <h6 class="mt-3 small fw-bold">Membership Tiers:</h6>
+        <div id="empTiersContainer">
+            <!-- Tiers will be added here -->
+        </div>
+        <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="addEmpTierBtn">
+            <span class="bi bi-plus-circle me-1"></span> Add Tier
+        </button>
+    </div>
+</template>
+
+<template id="tierTemplate">
+    <div class="input-group mb-2 tier-row">
+        <input type="text" class="form-control tier-name" placeholder="Tier Name (e.g., Gold)">
+        <input type="text" class="form-control tier-id" placeholder="@id (e.g., #tier-gold)">
+        <button class="btn btn-outline-danger btn-sm remove-tier-btn" type="button" title="Remove Tier">
+            <span class="bi bi-trash"></span>
+        </button>
+    </div>
+</template>
+<!-- ========== END: TEMPLATES FOR LOYALTY PROGRAM UI ========== -->
+                </div>
+                <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Close</button><button class="btn btn-primary" id="saveEmpBtn" type="button">Save Entities</button></div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" role="dialog" tabindex="-1" id="deleteConfirmModal" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="text-success-emphasis modal-title h5" id="deleteConfirmModalLabel"><span class="text-primary me-2 bi bi-exclamation-triangle-fill" aria-hidden="true"></span> Confirm Deletion </h3><button class="btn-close" aria-label="Close" data-bs-dismiss="modal" type="button"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to permanently delete the project: <strong class="text-danger-emphasis" id="projectNameToDelete"></strong>? </p>
+                    <p class="small">This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancel</button><button class="btn btn-danger" id="confirmDeleteBtn" type="button">Delete Project</button></div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" role="dialog" tabindex="-1" id="overwriteConfirmModal" aria-labelledby="overwriteConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="text-success-emphasis modal-title h5" id="overwriteConfirmModalLabel"><span class="text-primary me-2 bi bi-exclamation-diamond-fill" aria-hidden="true"></span> Confirm Overwrite </h3><button class="btn-close" aria-label="Close" data-bs-dismiss="modal" type="button"></button>
+                </div>
+                <div class="modal-body">
+                    <p>A project named <strong class="text-warning" id="projectNameOverwrite"></strong> already exists.</p>
+                    <p>Are you sure you want to overwrite it with the new settings?</p>
+                    <p class="small">This action will replace the old template permanently.</p>
+                </div>
+                <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancel</button><button class="btn btn-warning" id="confirmOverwriteBtn" type="button">Overwrite Project</button></div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" role="dialog" tabindex="-1" id="helpModal" aria-labelledby="helpModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="text-success-emphasis modal-title h5" id="helpModalLabel"><span class="text-primary me-2 bi bi-info-circle-fill" aria-hidden="true"></span></h3><button class="btn-close ms-auto me-0" aria-label="Close" data-bs-dismiss="modal" type="button"></button>
+                </div>
+                <div class="modal-body" id="helpModalBody"></div>
+                <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Close</button></div>
+            </div>
+        </div>
+    </div>
+    <div class="d-none" id="help-content-kb"><!-- ================== FAQ Identifiers ================== -->
+<template id="help-faq-identifiers">
+    <h4>Strategic Goal:</h4>
+    <p>To secure an interactive <a href="https://developers.google.com/search/docs/appearance/structured-data/faqpage" target="_blank" rel="noopener">FAQ Rich Result</a> in Google Search. This dramatically increases your SERP real estate, provides immediate value to users, and can significantly boost your Click-Through Rate (CTR) by establishing your page as an authoritative source for answers.</p>
+    
+    <hr class="my-3">
+    
+    <h4>How Auto-Detection Works:</h4>
+    <p>By default, Schema Architect is engineered to recognize a wide variety of common HTML patterns for FAQ sections. It performs a three-step analysis:</p>
+    <ol>
+        <li><strong>It finds the "Container"</strong> that groups a single Q&A pair using selectors like <code>.faq-item</code>, <code>.accordion-item</code>, or <code>.qa-item</code>.</li>
+        <li><strong>Within that container,</strong> it locates the "Question" text using selectors like <code>.question</code>, <code>.faq-q</code>, or <code>.accordion-button</code>.</li>
+        <li><strong>Inside the same container,</strong> it identifies the "Answer" text using selectors like <code>.answer</code>, <code>.faq-a</code>, or <code>.accordion-body</code>.</li>
+    </ol>
+    <p class="mt-2"><strong>The Intelligent Touch:</strong> After collecting the Q&A pairs, the tool performs a contextual analysis by searching for the nearest preceding heading (like an <code>&lt;h2&gt;</code> or <code>&lt;h3&gt;</code>). If it finds a heading like "Frequently Asked Questions," it intelligently uses this as the main name for the entire FAQ schema.</p>
+    
+    <hr class="my-3">
+
+    <h4>Example Generated Schema:</h4>
+    <p>When the tool successfully identifies your FAQ section, it generates a structured JSON-LD schema like this:</p>
+    <!-- The button to trigger the lazy load -->
+<button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#example-faq-schema" aria-expanded="false" aria-controls="example-faq-schema">
+    <span class="bi bi-code-slash me-1" aria-hidden="true"></span> Show/Hide Example Code
+</button>
+
+<!-- The collapsible container for the schema -->
+<div class="collapse mt-2" id="example-faq-schema">
+    <pre><code class="language-json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is the shipping time?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Shipping takes 3-5 business days."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do you offer international shipping?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, we ship to over 50 countries worldwide."
+      }
+    }
+  ]
+}</code></pre>
+</div>
+
+    
+    <hr class="my-3">
+
+    <h4>The Challenge: Your Unique Website Design</h4>
+    <p>If your site uses a custom HTML structure, the default analysis might fail. This is where you take command. Assume your FAQ code looks like this:</p>
+    
+    <pre><code class="language-html">&lt;!-- A custom FAQ structure --&gt;
+&lt;div class="qa-block"&gt;
+  &lt;div class="qa-title"&gt;What is the shipping time?&lt;/div&gt;
+  &lt;div class="qa-content"&gt;
+    &lt;p&gt;Shipping takes 3-5 business days.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+    
+    <h5 class="mt-3">Your Solution: Precision Guidance</h5>
+    <p>You need to "teach" the tool where to look by providing the correct CSS selectors:</p>
+    
+    <dl class="row">
+        <dt class="col-sm-4">1. FAQ Container:</dt>
+        <dd class="col-sm-8">The selector for the element that wraps <strong>one single Q&A pair</strong>. For our example: <code>.qa-block</code></dd>
+        
+        <dt class="col-sm-4 mt-2">2. Question Selector:</dt>
+        <dd class="col-sm-8 mt-2">The selector targeting the element with the question text. For our example: <code>.qa-title</code></dd>
+        
+        <dt class="col-sm-4 mt-2">3. Answer Selector:</dt>
+        <dd class="col-sm-8 mt-2">The selector targeting the element with the answer text. For our example: <code>.qa-content</code></dd>
+    </dl>
+    
+    <div class="alert alert-info mt-3 small" role="alert">
+        <span class="text-primary me-2 bi bi-info-circle-fill" aria-hidden="true"></span>
+        <strong>Pro Tip:</strong> The default selectors are powerful. Check the placeholder text in the input fields to see all the class names the tool recognizes automatically before creating your own.
+    </div>
+    
+    <p class="fw-bold mt-2">The Result: You switch the tool from "autopilot" to "precision navigation," guaranteeing 100% accurate data extraction and a flawless, Google-ready schema.</p>
+</template><!-- ================== Product Identifiers ================== -->
+<template id="help-product-identifiers">
+    <h4>Strategic Goal:</h4>
+    <p>To qualify for a <a href="https://developers.google.com/search/docs/appearance/structured-data/product" target="_blank" rel="noopener">Product Rich Result</a> and be eligible for <a href="https://developers.google.com/search/docs/appearance/merchant-listing" target="_blank" rel="noopener">Merchant Listing experiences</a>. This displays vital purchasing information—like price, ratings, shipping, and returns—directly in Google's search results, attracting qualified buyers and driving sales.</p>
+    
+    <hr class="my-3">
+    
+    <h4>How Auto-Detection Works:</h4>
+    <p>Schema Architect's default logic actively hunts for core e-commerce data using a variety of common, namespaced class names:</p>
+    <ul>
+        <li><strong>Price, SKU, and Brand:</strong> It scans for classes like <code>.product-price</code>, <code>.product-sku</code>, and <code>.product-brand</code>.</li>
+        <li><strong>Shipping & Returns:</strong> It also looks for details like <code>.shipping-cost</code> and <code>.return-window</code>.</li>
+    </ul>
+    <p class="mt-2"><strong>The Intelligent Touch:</strong> The tool intelligently connects <strong>Review</strong> data found elsewhere on the page to build <code>aggregateRating</code> and <code>review</code> properties. If shipping and return info isn't found, it adds smart defaults to maximize eligibility.</p>
+
+    <hr class="my-3">
+
+    <h4>Example Generated Schema:</h4>
+    <p>A fully populated product schema can look like this:</p>
+
+    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#example-product-schema" aria-expanded="false" aria-controls="example-product-schema">
+        <span class="bi bi-code-slash me-1" aria-hidden="true"></span> Show/Hide Example Code
+    </button>
+    <div class="collapse mt-2" id="example-product-schema">
+        <pre><code class="language-json">{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "The Nebula Projector X1",
+  "image": "https://example.com/projector.jpg",
+  "sku": "NPX1-2025",
+  "brand": {
+    "@type": "Brand",
+    "name": "Stellar Gadgets Inc."
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.7",
+    "reviewCount": "1"
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "399.99",
+    "priceCurrency": "USD",
+    "shippingDetails": {
+      "@type": "OfferShippingDetails",
+      "shippingRate": {
+        "@type": "MonetaryAmount",
+        "value": "5.99"
+      }
+    },
+    "hasMerchantReturnPolicy": {
+      "@type": "MerchantReturnPolicy",
+      "merchantReturnDays": 60
+    }
+  }
+}</code></pre>
+    </div>
+    
+    <hr class="my-3">
+
+    <h4>The Challenge & Your Solution: Precision Guidance</h4>
+    <p>Use the fields below to map your unique e-commerce theme. For example, if your HTML is:</p>
+    
+    <pre><code class="language-html">&lt;!-- A custom e-commerce structure --&gt;
+&lt;div class="merchandise-details"&gt;
+  &lt;h2 class="item-name"&gt;The Nebula Projector X1&lt;/h2&gt;
+  &lt;span class="cost-figure"&gt;$399.99&lt;/span&gt;
+  &lt;div class="logistics"&gt;
+    &lt;span class="shipping-info"&gt;Ships to US & CA&lt;/span&gt;
+    &lt;span class="return-policy"&gt;60-day returns&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+    <h5 class="mt-3">Mapping Your Custom Theme:</h5>
+    <p>You would provide the following selectors for each field:</p>
+    
+    <dl class="row">
+      <dt class="col-sm-4">Price:</dt>
+      <dd class="col-sm-8">For our example: <code>.cost-figure</code></dd>
+      <dt class="col-sm-4 mt-2">Shipping Country:</dt>
+      <dd class="col-sm-8 mt-2">For our example: <code>.shipping-info</code></dd>
+      <dt class="col-sm-4 mt-2">Return Days:</dt>
+      <dd class="col-sm-8 mt-2">For our example: <code>.return-policy</code></dd>
+    </dl>
+    
+    <div class="alert alert-info small mt-3" role="alert">
+        <span class="text-primary me-2 bi bi-info-circle-fill" aria-hidden="true"></span>
+        <strong>Pro Tip:</strong> The tool uses smart defaults (like free shipping) if fields are left blank. By filling in the "Shipping" and "Return" fields, you replace these defaults with your exact business policies for maximum accuracy.
+    </div>
+    
+    <p class="fw-bold mt-2">The Result: You create a comprehensive and accurate product schema that is fully optimized to stand out in both standard and merchant search results.</p>
+</template><!-- ================== Recipe Identifiers ================== -->
+<template id="help-recipe-identifiers">
+    <h4>Strategic Goal:</h4>
+    <p>To capture a visually compelling <a href="https://developers.google.com/search/docs/appearance/structured-data/recipe" target="_blank" rel="noopener">Recipe Rich Result</a>. This positions your recipe directly in search with key details like cooking time, ratings, and an image, dramatically increasing traffic from users looking for their next meal.</p>
+    
+    <hr class="my-3">
+    
+    <h4>How Auto-Detection Works:</h4>
+    <p>Schema Architect is trained to find recipe content by first identifying a main "Recipe Container" (e.g., <code>.recipe-card</code>). Within that container, it automatically extracts key details:</p>
+    <ol>
+        <li><strong>Name:</strong> From headings like <code>.recipe-title</code>, <code>h1</code>, etc.</li>
+        <li><strong>Prep Time & Cook Time:</strong> From elements with classes like <code>.prep-time</code> and <code>.cook-time</code>.</li>
+        <li><strong>Ingredients & Instructions:</strong> From list items within containers like <code>.ingredients</code> and <code>.instructions</code>.</li>
+    </ol>
+    <p class="mt-2"><strong>The Intelligent Touch:</strong> The tool actively searches for a contextual image for the recipe and will also link any discovered <strong>Review</strong> data to create a complete and powerful schema with ratings.</p>
+    
+    <hr class="my-3">
+
+    <h4>Example Generated Schema:</h4>
+    <p>A successful analysis will produce a valid JSON-LD schema like this:</p>
+    
+    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#example-recipe-schema" aria-expanded="false" aria-controls="example-recipe-schema">
+        <span class="bi bi-code-slash me-1" aria-hidden="true"></span> Show/Hide Example Code
+    </button>
+    
+    <div class="collapse mt-2" id="example-recipe-schema">
+        <pre><code class="language-json">{
+  "@context": "https://schema.org",
+  "@type": "Recipe",
+  "name": "Quick & Easy Pasta",
+  "image": "https://example.com/pasta.jpg",
+  "author": { "@type": "Person", "name": "Chef Sara" },
+  "datePublished": "2025-12-01",
+  "description": "A delicious and easy pasta recipe...",
+  "prepTime": "PT15M",
+  "cookTime": "PT20M",
+  "recipeIngredient": [
+    "1 cup of flour",
+    "2 eggs"
+  ],
+  "recipeInstructions": [
+    { "@type": "HowToStep", "text": "First, mix the flour and salt." },
+    { "@type": "HowToStep", "text": "Next, add the eggs and knead." }
+  ],
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.8",
+    "ratingCount": "1"
+  }
+}</code></pre>
+    </div>
+
+    <hr class="my-3">
+
+    <h4>The Challenge: Your Custom Recipe Card Design</h4>
+    <p>If your recipe card uses a unique layout, you'll need to guide the tool. Assume your HTML is:</p>
+    
+    <pre><code class="language-html">&lt;!-- A custom Recipe Card structure --&gt;
+&lt;article class="recipe-post"&gt;
+  &lt;h1 class="dish-name"&gt;Quick & Easy Pasta&lt;/h1&gt;
+  &lt;div class="timing"&gt;
+    &lt;span class="prep-duration"&gt;15 min&lt;/span&gt;
+    &lt;span class="cook-duration"&gt;20 min&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;ul class="ingredient-list"&gt;
+    &lt;li class="ingredient"&gt;1 cup flour&lt;/li&gt;
+  &lt;/ul&gt;
+  &lt;ol class="method-steps"&gt;
+    &lt;li class="step"&gt;Mix the flour and salt.&lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/article&gt;</code></pre>
+    
+    <h5 class="mt-3">Your Solution: Precision Guidance</h5>
+    <p>Provide the tool with the direct CSS selectors for your unique design:</p>
+    
+    <dl class="row">
+        <dt class="col-sm-4">Recipe Container:</dt>
+        <dd class="col-sm-8">For our example: <code>.recipe-post</code></dd>
+        <dt class="col-sm-4 mt-2">Recipe Name:</dt>
+        <dd class="col-sm-8 mt-2">For our example: <code>.dish-name</code></dd>
+        <dt class="col-sm-4 mt-2">Prep Time:</dt>
+        <dd class="col-sm-8 mt-2">For our example: <code>.prep-duration</code></dd>
+        <dt class="col-sm-4 mt-2">Cook Time:</dt>
+        <dd class="col-sm-8 mt-2">For our example: <code>.cook-duration</code></dd>
+        <dt class="col-sm-4 mt-2">Ingredients (LI):</dt>
+        <dd class="col-sm-8 mt-2">For our example: <code>.ingredient-list .ingredient</code></dd>
+        <dt class="col-sm-4 mt-2">Instructions (LI):</dt>
+        <dd class="col-sm-8 mt-2">For our example: <code>.method-steps .step</code></dd>
+    </dl>
+    
+    <div class="alert alert-info small mt-3" role="alert">
+        <span class="text-primary me-2 bi bi-info-circle-fill" aria-hidden="true"></span>
+        <strong>Pro Tip:</strong> Check the placeholder text in the input fields to see all the default class names the tool recognizes. Providing a "Recipe Container" is key to accurately isolating recipe data on a complex page.
+    </div>
+    
+    <p class="fw-bold mt-2">The Result: You empower the tool to perfectly parse your unique recipe layout, producing a rich, valid schema that's ready to capture the attention of home cooks on Google.</p>
+</template><!-- ================== Review Identifiers ================== -->
+<template id="help-review-identifiers">
+  <h4>Strategic Goal:</h4>
+  <p>To acquire a prominent <a
+      href="https://developers.google.com/search/docs/appearance/structured-data/review-snippet" target="_blank"
+      rel="noopener">Review Snippet</a> (often shown as gold stars) in Google Search. This provides immediate social
+    proof, builds trust before the click, and can significantly improve CTR by making your result stand out.</p>
+
+  <hr class="my-3">
+
+  <h4>How Auto-Detection Works:</h4>
+  <p>Schema Architect is programmed to find the core components of a review by looking for a main "Review Container"
+    (e.g., <code>.review-snippet</code>). Within that container, it searches for:</p>
+  <ol>
+    <li><strong>Rating Value:</strong> It looks for a numerical score using selectors like <code>.rating-value</code>.
+    </li>
+    <li><strong>Reviewed Item Name:</strong> It attempts to identify what is being reviewed using selectors like
+      <code>.reviewed-item-name</code>.</li>
+  </ol>
+  <p class="mt-2"><strong>The Intelligent Touch:</strong> The tool understands that reviews are often part of a larger
+    context. It will try to link the review to other detected entities, such as a <strong>Product</strong> or
+    <strong>Recipe</strong>, creating a powerful and interconnected schema.
+  </p>
+
+  <hr class="my-3">
+
+  <h4>Example Generated Schema:</h4>
+  <p>A successful analysis will produce a valid JSON-LD schema like this:</p>
+
+  <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="collapse"
+    data-bs-target="#example-review-schema" aria-expanded="false" aria-controls="example-review-schema" aria-expanded="false" aria-controls="example-review-schema">
+    <span class="bi bi-code-slash me-1" aria-hidden="true"></span> Show/Hide Example Code
+  </button>
+
+    <div class="collapse mt-2" id="example-review-schema">
+        <pre><code class="language-json">{
+  "@context": "https://schema.org",
+  "@type": "Review",
+  "author": {
+    "@type": "Person",
+    "name": "Valued Customer"
+  },
+  "datePublished": "2025-06-15",
+  "reviewRating": {
+    "@type": "Rating",
+    "ratingValue": "4.8",
+    "bestRating": "5"
+  },
+  "itemReviewed": {
+    "@type": "Product",
+    "name": "Super Blender 5000",
+    "image": "https://example.com/images/blender.jpg",
+    "offers": {
+      "@type": "Offer",
+      "price": "89.99",
+      "priceCurrency": "USD"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "reviewCount": "1"
+    }
+  }
+}</code></pre>
+    </div>
+
+  <hr class="my-3">
+
+  <h4>The Challenge: Your Custom Review Layout</h4>
+  <p>If your website displays reviews using a unique theme, you'll need to provide the exact map. Consider this HTML:
+  </p>
+
+  <pre><code class="language-html">&lt;!-- A custom Review structure --&gt;
+&lt;div class="user-critique"&gt;
+  &lt;h3 class="subject-of-review"&gt;Super Blender 5000&lt;/h3&gt;
+  &lt;div class="score-display"&gt;4.8 out of 5 stars&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+  <h5 class="mt-3">Your Solution: Precision Guidance</h5>
+  <p>You can direct the tool to the exact data points using CSS selectors:</p>
+
+  <dl class="row">
+    <dt class="col-sm-4">Review Container:</dt>
+    <dd class="col-sm-8">For our example: <code>.user-critique</code></dd>
+    <dt class="col-sm-4 mt-2">Rating (Value):</dt>
+    <dd class="col-sm-8 mt-2">For our example: <code>.score-display</code></dd>
+    <dt class="col-sm-4 mt-2">Reviewed Item:</dt>
+    <dd class="col-sm-8 mt-2">For our example: <code>.subject-of-review</code></dd>
+  </dl>
+
+  <div class="alert alert-info small mt-3" role="alert">
+    <span class="text-primary me-2 bi bi-info-circle-fill" aria-hidden="true"></span>
+    <strong>Pro Tip:</strong> For the "Rating Value," you can provide a CSS selector to extract it dynamically, OR
+    hardcode a static value directly into the input field (e.g., "4.5"). This is useful for pages that are a review of a
+    single item.
+  </div>
+
+  <p class="fw-bold mt-2">The Result: You ensure every detail of your review is perfectly captured, producing a valid
+    and robust schema that signals trust and authority to both Google and potential customers.</p>
+</template><!-- ================== How-To Identifiers ================== -->
+<template id="help-howto-identifiers">
+    <h4>Strategic Goal:</h4>
+    <p>To structure step-by-step instructional content for platforms like <strong>Google Assistant and Google Home Hub</strong>. While Google has retired How-to rich results from standard web search, this schema is still valuable for voice search and smart displays.</p>
+    
+    <div class="alert alert-warning small mt-3" role="alert">
+        <span class="bi bi-exclamation-triangle-fill me-2 text-primary" aria-hidden="true"></span>
+        <strong>Important Update:</strong> As of recent changes, Google no longer displays How-to rich results on desktop and mobile Search. However, this schema remains a best practice for structuring instructional content for other Google surfaces.
+    </div>
+    
+    <hr class="my-3">
+    
+    <h4>How Auto-Detection Works:</h4>
+    <p>The tool identifies instructional content by looking for a main "How-To Container" (e.g., <code>.howto-guide</code>). Within that container, it analyzes the structure of each step:</p>
+    <ol>
+        <li><strong>It finds the "How-To Name"</strong> from a heading like <code>.howto-title</code> or <code>&lt;h2&gt;</code>.</li>
+        <li><strong>It finds each "Step Container"</strong> using selectors like <code>.step</code> or <code>.howto-step</code>.</li>
+        <li><strong>Within each step,</strong> it locates the "Step Text" (the core instruction) using <code>.step-text</code>.</li>
+    </ol>
+
+    <hr class="my-3">
+
+    <h4>Example Generated Schema:</h4>
+    <p>A successful analysis will produce a technically valid JSON-LD schema like this:</p>
+    
+    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#example-howto-schema" aria-expanded="false" aria-controls="example-howto-schema">
+        <span class="bi bi-code-slash me-1" aria-hidden="true"></span> Show/Hide Example Code
+    </button>
+
+    <div class="collapse mt-2" id="example-howto-schema">
+        <pre><code class="language-json">{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to Assemble the Widget",
+  "step": [
+    {
+      "@type": "HowToStep",
+      "name": "Unbox Components",
+      "text": "First, unbox all components carefully.",
+      "url": "https://example.com/guide#step1",
+      "image": "https://example.com/images/step1.jpg"
+    },
+    {
+      "@type": "HowToStep",
+      "name": "Attach Parts",
+      "text": "Next, attach Part A to Part B using the provided screws.",
+      "url": "https://example.com/guide#step2",
+      "image": "https://example.com/images/step2.jpg"
+    }
+  ]
+}</code></pre>
+    </div>
+    
+    <hr class="my-3">
+
+    <h4>The Challenge: Your Custom Guide Layout</h4>
+    <p>If your guide uses a unique HTML structure, you need to map it for the tool. Assume your HTML is:</p>
+    
+    <pre><code class="language-html">&lt;!-- A custom How-To structure --&gt;
+&lt;section class="guide-wrapper"&gt;
+    &lt;h1 class="guide-heading"&gt;How to Assemble the Widget&lt;/h1&gt;
+    &lt;div class="instruction-block"&gt;
+        &lt;p class="instruction-details"&gt;Gather all your tools...&lt;/p&gt;
+    &lt;/div&gt;
+&lt;/section&gt;</code></pre>
+
+    <h5 class="mt-3">Your Solution: Precision Guidance</h5>    
+    <dl class="row">
+        <dt class="col-sm-4">How-To Container:</dt>
+        <dd class="col-sm-8">For our example: <code>.guide-wrapper</code></dd>
+        <dt class="col-sm-4 mt-2">How-To Name:</dt>
+        <dd class="col-sm-8 mt-2">For our example: <code>.guide-heading</code></dd>
+        <dt class="col-sm-4 mt-2">Step Container:</dt>
+        <dd class="col-sm-8 mt-2">For our example: <code>.instruction-block</code></dd>
+        <dt class="col-sm-4 mt-2">Step Text:</dt>
+        <dd class="col-sm-8 mt-2">For our example: <code>.instruction-details</code></dd>
+    </dl>
+    
+    <p class="fw-bold mt-2">The Result: You create a perfectly structured guide that, while not appearing as a web rich result, correctly communicates your instructional content to Google's broader ecosystem.</p>
+</template><!-- ================== Breadcrumb Identifiers ================== -->
+<template id="help-breadcrumb-identifiers">
+    <h4>Strategic Goal:</h4>
+    <p>To display your site's hierarchy in the <a href="https://developers.google.com/search/docs/appearance/structured-data/breadcrumb" target="_blank" rel="noopener">search results</a>, replacing the standard URL path. This provides users with clear navigational context, improves their understanding of the page's location, and can encourage exploration of higher-level pages on your site.</p>
+    
+    <hr class="my-3">
+    
+    <h4>How Auto-Detection Works:</h4>
+    <p>Schema Architect's auto-detection is highly effective for breadcrumbs as they follow standard web conventions. It specifically looks for common HTML structures such as:</p>
+    <ul>
+        <li>A Bootstrap-style breadcrumb: <code>&lt;nav aria-label="breadcrumb"&gt;&lt;ol class="breadcrumb"&gt;&lt;li&gt;...&lt;/li&gt;&lt;/ol&gt;&lt;/nav&gt;</code></li>
+        <li>Or any list element (<code>&lt;li&gt;</code>) inside a container with a class containing the word "breadcrumbs".</li>
+    </ul>
+    <p class="mt-2"><strong>The Intelligent Touch:</strong> The tool correctly assembles the extracted data, automatically constructing the required <code>itemListElement</code> array, assigning the correct sequential <code>position</code> to each item, and identifying the final item in the trail as the current page (even if it's not a link).</p>
+    
+    <hr class="my-3">
+
+    <h4>Example Generated Schema:</h4>
+    <p>A successful analysis will produce a valid JSON-LD schema like this:</p>
+    
+    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#example-breadcrumb-schema" aria-expanded="false" aria-controls="example-breadcrumb-schema">
+        <span class="bi bi-code-slash me-1" aria-hidden="true"></span> Show/Hide Example Code
+    </button>
+
+    <div class="collapse mt-2" id="example-breadcrumb-schema">
+        <pre><code class="language-json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://example.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https://example.com/blog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Latest News"
+    }
+  ]
+}</code></pre>
+    </div>
+
+    <hr class="my-3">
+
+    <h4>The Challenge: Your Custom Navigation Structure</h4>
+    <p>If your theme uses a different structure, you need to tell the tool what defines a single "crumb." Consider this custom HTML:</p>
+    
+    <pre><code class="language-html">&lt;!-- A custom Breadcrumb structure --&gt;
+&lt;div class="breadcrumb-path"&gt;
+  &lt;span class="path-item"&gt;&lt;a href="/"&gt;Home&lt;/a&gt;&lt;/span&gt;
+  &lt;span class="path-item"&gt;&lt;a href="/blog/"&gt;Blog&lt;/a&gt;&lt;/span&gt;
+  &lt;span class="path-item-current"&gt;Latest News&lt;/span&gt;
+&lt;/div&gt;</code></pre>
+    
+    <h5 class="mt-3">Your Solution: Precision Guidance</h5>
+    <p>For breadcrumbs, you only need to provide one crucial piece of information:</p>
+    
+    <dl class="row">
+        <dt class="col-sm-4">Item (LI):</dt>
+        <dd class="col-sm-8">The selector for <strong>each individual item</strong> in the trail. For our example, you would enter: <code>.path-item, .path-item-current</code></dd>
+    </dl>
+    
+    <div class="alert alert-info small mt-3" role="alert">
+        <span class="text-primary me-2 bi bi-info-circle-fill" aria-hidden="true"></span>
+        <strong>Pro Tip:</strong> If your active/current breadcrumb item has a different class than the others, you can combine the selectors with a comma (<code>,</code>) as shown in the example. This tells the tool to gather all elements matching either selector.
+    </div>
+    
+    <p class="fw-bold mt-2">The Result: By providing a single, precise selector, you enable the tool to map your unique navigation design, generating a perfectly structured breadcrumb schema that clarifies your site structure for Google.</p>
+</template><!-- ================== Event Identifiers ================== -->
+<template id="help-event-identifiers">
+    <h4>Strategic Goal:</h4>
+    <p>To spotlight your webinars, conferences, and concerts in a dedicated <a href="https://developers.google.com/search/docs/appearance/structured-data/event" target="_blank" rel="noopener">Event Rich Result</a>. This format showcases crucial details like the date and location directly in search results, capturing high-intent users and helping to drive attendance.</p>
+    
+    <hr class="my-3">
+    
+    <h4>How Auto-Detection Works:</h4>
+    <p>Schema Architect scans for event listings by first looking for a start date. Once a date is found, it searches for other key details:</p>
+    <ol>
+        <li><strong>It finds the "Event Name"</strong> using selectors like <code>.event-title</code> or a heading (<code>h1, h2, h3</code>).</li>
+        <li><strong>It locates the "Start Date"</strong> from common class names like <code>.event-start-date</code> or attributes.</li>
+        <li><strong>It identifies the "Location"</strong> and <strong>"Organizer"</strong> using selectors like <code>.location</code>, <code>.venue</code>, and <code>.organizer</code>.</li>
+    </ol>
+    <p class="mt-2"><strong>The Intelligent Touch:</strong> The tool doesn't just copy text; it structures it correctly. It converts dates to the required ISO 8601 format and wraps the location and organizer information in the proper nested schema objects (<code>Place</code> and <code>Organization</code>).</p>
+    
+    <hr class="my-3">
+
+    <h4>Example Generated Schema:</h4>
+    <p>A successful analysis will produce a valid JSON-LD schema like this:</p>
+    
+    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#example-event-schema" aria-expanded="false" aria-controls="example-event-schema">
+        <span class="bi bi-code-slash me-1" aria-hidden="true"></span> Show/Hide Example Code
+    </button>
+
+    <div class="collapse mt-2" id="example-event-schema">
+        <pre><code class="language-json">{
+  "@context": "https://schema.org",
+  "@type": "Event",
+  "name": "Annual Marketing Summit",
+  "startDate": "2025-10-26T09:00:00-05:00",
+  "location": {
+    "@type": "Place",
+    "name": "Grand Expo Center",
+    "address": "123 Expo Way, Anytown"
+  },
+  "organizer": {
+    "@type": "Organization",
+    "name": "Digital Marketers Inc."
+  },
+  "image": "https://example.com/images/event-banner.jpg",
+  "description": "Join industry leaders for our annual summit."
+}</code></pre>
+    </div>
+
+    <hr class="my-3">
+
+    <h4>The Challenge: Your Custom Event Listing</h4>
+    <p>If your website uses a custom design, the default scan may not find the information. Assume your event is displayed with this HTML:</p>
+    
+    <pre><code class="language-html">&lt;!-- A custom Event Listing --&gt;
+&lt;div class="summit-details"&gt;
+  &lt;h2 class="summit-title"&gt;Annual Marketing Summit&lt;/h2&gt;
+  &lt;ul class="summit-meta"&gt;
+    &lt;li class="summit-date"&gt;October 26, 2025&lt;/li&gt;
+    &lt;li class="summit-venue"&gt;Grand Expo Center&lt;/li&gt;
+    &lt;li class="summit-host"&gt;Hosted by: Digital Marketers Inc.&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/div&gt;</code></pre>
+    
+    <h5 class="mt-3">Your Solution: Precision Guidance</h5>
+    <p>You can tell the tool exactly where to find each piece of data:</p>
+    
+    <dl class="row">
+        <dt class="col-sm-4">Event Name:</dt>
+        <dd class="col-sm-8">For our example: <code>.summit-title</code></dd>
+        <dt class="col-sm-4 mt-2">Start Date:</dt>
+        <dd class="col-sm-8 mt-2">For our example: <code>.summit-date</code></dd>
+        <dt class="col-sm-4 mt-2">Location:</dt>
+        <dd class="col-sm-8 mt-2">For our example: <code>.summit-venue</code></dd>
+        <dt class="col-sm-4 mt-2">Organizer:</dt>
+        <dd class="col-sm-8 mt-2">For our example: <code>.summit-host</code></dd>
+    </dl>
+    
+    <div class="alert alert-info small mt-3" role="alert">
+        <span class="text-primary me-2 bi bi-info-circle-fill" aria-hidden="true"></span>
+        <strong>Pro Tip:</strong> For the highest accuracy, use a machine-readable format for your date in a `datetime` attribute, like <code>&lt;time datetime="2025-10-26T09:00-05:00"&gt;...&lt;/time&gt;</code>. This guarantees Google understands the exact date and timezone.
+    </div>
+    
+    <p class="fw-bold mt-2">The Result: By precisely mapping your event's details, you produce a powerful, structured data entry that enables Google to feature your event, making it easier than ever for your audience to discover and attend.</p>
+</template><!-- ================== Organization Identifiers ================== -->
+<template id="help-organization-identifiers">
+    <h4>Strategic Goal:</h4>
+    <p>To explicitly define your official brand identity for Google's Knowledge Graph. This is a critical factor for establishing E-E-A-T (Expertise, Authoritativeness, Trustworthiness) and can result in a rich <a href="https://developers.google.com/search/docs/appearance/structured-data/organization" target="_blank" rel="noopener">Knowledge Panel</a> for your brand in search results.</p>
+    
+    <hr class="my-3">
+    
+    <h4>How Auto-Detection Works:</h4>
+    <p>Schema Architect scans for the most common digital footprints of a corporate identity, typically found in the site's header or footer.</p>
+    <ol>
+        <li><strong>It finds the "Logo"</strong> by searching for image tags with "logo" in their name or class (e.g., <code>&lt;img class="logo"&gt;</code>).</li>
+        <li><strong>It locates the "Address"</strong> using common class names like <code>.address</code>, <code>.contact-address</code>, or the semantic <code>&lt;footer&gt;&lt;address&gt;</code> tag.</li>
+        <li><strong>It identifies the "Telephone"</strong> number by prioritizing clickable telephone links (<code>href="tel:..."</code>).</li>
+    </ol>
+    <p class="mt-2"><strong>The Intelligent Touch:</strong> The tool's most powerful feature here is its integration with the <strong>Entity Management Platform (EMP)</strong>. Data saved in the EMP is treated as the ultimate source of truth and will always override any conflicting information found on the page, ensuring absolute brand consistency.
+    </p>
+    
+    <hr class="my-3">
+
+    <h4>Example Generated Schema:</h4>
+    <p>A successful analysis will produce a valid JSON-LD schema like this:</p>
+
+    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#example-org-schema" aria-expanded="false" aria-controls="example-org-schema">
+        <span class="bi bi-code-slash me-1" aria-hidden="true"></span> Show/Hide Example Code
+    </button>
+    
+    <div class="collapse mt-2" id="example-org-schema">
+        <pre><code class="language-json">{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Ai8V Tools",
+  "url": "https://ai8v.com",
+  "logo": "https://ai8v.com/assets/img/logo.png",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "123 Innovation Drive",
+    "addressLocality": "Tech City"
+  },
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "telephone": "+1-800-555-0199",
+    "contactType": "customer service"
+  }
+}</code></pre>
+    </div>
+
+    <hr class="my-3">
+
+    <h4>The Challenge: Your Custom Header/Footer Design</h4>
+    <p>If your site's contact information is in a custom-designed section, you'll need to guide the tool. Assume your HTML is:</p>
+    
+    <pre><code class="language-html">&lt;!-- A custom Footer structure --&gt;
+&lt;footer class="site-footer"&gt;
+  &lt;img class="brand-emblem" src="/img/official-logo.svg"&gt;
+  &lt;div class="corp-info"&gt;
+    &lt;p class="office-location"&gt;123 Innovation Drive, Tech City&lt;/p&gt;
+    &lt;a class="corp-phone" href="tel:5550102"&gt;Call Us&lt;/a&gt;
+  &lt;/div&gt;
+&lt;/footer&gt;</code></pre>
+    
+    <h5 class="mt-3">Your Solution: Precision Guidance</h5>
+    <p>You can pinpoint your organization's core details for the tool:</p>
+    
+    <dl class="row">
+        <dt class="col-sm-4">Logo (URL):</dt>
+        <dd class="col-sm-8">For our example: <code>.brand-emblem</code></dd>
+        
+        <dt class="col-sm-4 mt-2">Address:</dt>
+        <dd class="col-sm-8 mt-2">For our example: <code>.office-location</code></dd>
+        
+        <dt class="col-sm-4 mt-2">Telephone:</dt>
+        <dd class="col-sm-8 mt-2">For our example: <code>.corp-phone</code></dd>
+    </dl>
+    
+    <div class="alert alert-info small mt-3" role="alert">
+      <span class="text-primary me-2 bi bi-info-circle-fill" aria-hidden="true"></span>
+        <strong>Pro Tip:</strong> For maximum authority and consistency, use the <strong>Entity Management Platform (EMP)</strong> button to save your core brand data. This makes your brand information globally available to the tool, so you only have to define it once.
+    </div>
+    
+    <p class="fw-bold mt-2">The Result: By clearly defining your organizational data, you send a powerful and unambiguous signal to Google, strengthening your brand's authority and improving how it is represented in the Knowledge Graph.</p>
+</template><!-- ================== Video Identifiers ================== -->
+<template id="help-video-identifiers">
+    <h4>Strategic Goal:</h4>
+    <p>To have your videos featured in <a href="https://developers.google.com/search/docs/appearance/structured-data/video" target="_blank" rel="noopener">Video Rich Results</a>, including carousels, thumbnails in search, and the dedicated Video search tab. This is essential for boosting engagement and driving traffic directly to your video content.</p>
+    
+    <hr class="my-3">
+    
+    <h4>How Auto-Detection Works:</h4>
+    <p>Schema Architect actively searches for a main video container (like <code>.video-spotlight</code>). Once a video is detected (by finding a thumbnail or a video URL), it searches within that container for:</p>
+    <ol>
+        <li><strong>Video Title:</strong> Using selectors like <code>.video-title</code> or a heading (<code>h1, h2, h3</code>).</li>
+        <li><strong>Description:</strong> Using selectors like <code>.video-description</code>.</li>
+        <li><strong>Thumbnail URL & Content URL:</strong> By looking for <code>&lt;img&gt;</code> tags, <code>&lt;iframe&gt;</code> tags from YouTube/Vimeo, or custom <code>data-video-id</code> attributes.</li>
+        <li><strong>Upload Date:</strong> Using selectors like <code>.upload-date</code> or a <code>&lt;time&gt;</code> tag.</li>
+    </ol>
+    <p class="mt-2"><strong>The Intelligent Touch:</strong> The tool correctly formats all extracted data, converting the date to the required ISO 8601 format and ensuring the final schema includes a <code>publisher</code> by linking to your Organization data.</p>
+    
+    <hr class="my-3">
+
+    <h4>Example Generated Schema:</h4>
+    <p>A successful analysis will produce a valid JSON-LD schema like this:</p>
+    
+    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#example-video-schema" aria-expanded="false" aria-controls="example-video-schema">
+        <span class="bi bi-code-slash me-1" aria-hidden="true"></span> Show/Hide Example Code
+    </button>
+    
+    <div class="collapse mt-2" id="example-video-schema">
+        <pre><code class="language-json">{
+  "@context": "https://schema.org",
+  "@type": "VideoObject",
+  "name": "Our Product in Action",
+  "description": "A quick demo showing the key features.",
+  "thumbnailUrl": "https://example.com/img/product-video-thumb.jpg",
+  "uploadDate": "2025-01-15T08:00:00+00:00",
+  "contentUrl": "https://www.youtube.com/watch?v=xyz123",
+  "embedUrl": "https://www.youtube.com/embed/xyz123",
+  "publisher": {
+    "@type": "Organization",
+    "name": "Your Brand Name"
+  }
+}</code></pre>
+    </div>
+
+    <hr class="my-3">
+
+    <h4>The Challenge: Your Custom Video Player</h4>
+    <p>If your video section uses a unique layout, you'll need to guide the tool. Assume your HTML is:</p>
+    
+    <pre><code class="language-html">&lt;!-- A custom Video Section --&gt;
+&lt;article class="video-feature"&gt;
+  &lt;h2 class="video-headline"&gt;Our Product in Action&lt;/h2&gt;
+  &lt;div class="player"&gt;
+    &lt;img class="video-poster" src="/img/product-video-thumb.jpg"&gt;
+  &lt;/div&gt;
+  &lt;p class="video-synopsis"&gt;A quick demo showing the key features.&lt;/p&gt;
+&lt;/article&gt;</code></pre>
+
+    <h5 class="mt-3">Your Solution: Precision Guidance</h5>
+    <p>Provide the tool with the direct CSS selectors for your unique design:</p>
+    
+    <dl class="row">
+        <dt class="col-sm-4">Video Container:</dt>
+        <dd class="col-sm-8">For our example: <code>.video-feature</code></dd>
+        <dt class="col-sm-4 mt-2">Video Title:</dt>
+        <dd class="col-sm-8 mt-2">For our example: <code>.video-headline</code></dd>
+        <dt class="col-sm-4 mt-2">Description:</dt>
+        <dd class="col-sm-8 mt-2">For our example: <code>.video-synopsis</code></dd>
+        <dt class="col-sm-4 mt-2">Thumbnail URL:</dt>
+        <dd class="col-sm-8 mt-2">For our example: <code>.video-poster</code></dd>
+    </dl>
+    
+    <div class="alert alert-info small mt-3" role="alert">
+      <span class="text-primary me-2 bi bi-info-circle-fill" aria-hidden="true"></span>
+      <strong>Pro Tip:</strong> The `thumbnailUrl` is a required field. Check the placeholder text in the input fields to see all the default selectors the tool uses to find it automatically.
+    </div>
+    
+    <p class="fw-bold mt-2">The Result: By precisely mapping your video's metadata, you transform a simple embedded player into a rich, indexable media object that Google can feature prominently, driving views and engagement.</p>
+</template><!-- ================== Local Business Identifiers ================== -->
+<template id="help-localbusiness-identifiers">
+    <h4>Strategic Goal:</h4>
+    <p>To dominate local search results by securing a detailed <a href="https://developers.google.com/search/docs/appearance/structured-data/local-business" target="_blank" rel="noopener">Local Business Rich Result</a> and enhancing your Google Knowledge Panel. This provides customers with vital information like your hours and location directly in search, driving foot traffic and phone calls.</p>
+    
+    <hr class="my-3">
+    
+    <h4>How Auto-Detection Works:</h4>
+    <p>Schema Architect builds upon the <strong>Organization</strong> data it finds (like name, address, and logo). It then specifically looks for signals that indicate a physical or local business:</p>
+    <ol>
+        <li><strong>It finds "Price Range"</strong> using selectors like <code>.price-range</code> or attributes like <code>[itemprop='priceRange']</code>.</li>
+        <li><strong>It locates "Opening Hours"</strong> using selectors like <code>.opening-hours</code>, <code>.hours-of-operation</code>, or <code>[itemprop='openingHours']</code>.</li>
+    </ol>
+    <p class="mt-2">
+        <strong>The Intelligent Touch:</strong> The tool understands that <code>LocalBusiness</code> is a more specific type of <code>Organization</code>. If it finds even one local business signal, it will suggest <code>LocalBusiness</code> as a more accurate choice, while still inheriting all the core data from the Organization analysis.
+    </p>
+
+    <hr class="my-3">
+
+    <h4>Example Generated Schema:</h4>
+    <p>A successful analysis will produce a valid JSON-LD schema like this:</p>
+
+    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#example-localbusiness-schema" aria-expanded="false" aria-controls="example-localbusiness-schema">
+        <span class="bi bi-code-slash me-1" aria-hidden="true"></span> Show/Hide Example Code
+    </button>
+    
+    <div class="collapse mt-2" id="example-localbusiness-schema">
+        <pre><code class="language-json">{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "Ai8V Cafe",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "123 Innovation Drive",
+    "addressLocality": "Tech City",
+    "addressRegion": "CA",
+    "postalCode": "94043"
+  },
+  "image": "https://example.com/images/cafe.jpg",
+  "telephone": "+1-800-555-0199",
+  "priceRange": "$$",
+  "openingHours": "Mo-Fr 08:00-16:00",
+  "logo": "https://example.com/images/logo.png"
+}</code></pre>
+    </div>
+
+    <hr class="my-3">
+
+    <h4>The Challenge: Your Custom "Contact Us" or Footer Section</h4>
+    <p>Your business hours or price range might be in a custom-designed section. Assume your HTML is:</p>
+    
+    <pre><code class="language-html">&lt;!-- A custom business info block --&gt;
+&lt;div class="store-info"&gt;
+  &lt;p class="store-hours"&gt;Hours: Tuesday-Saturday, 10:00 - 18:00&lt;/p&gt;
+  &lt;p class="affordability"&gt;Our range: $$&lt;/p&gt;
+&lt;/div&gt;</code></pre>
+
+    <h5 class="mt-3">Your Solution: Precision Guidance</h5>
+    <p>You can tell the tool exactly where to find this information:</p>
+    
+    <dl class="row">
+      <dt class="col-sm-4">Price Range:</dt>
+      <dd class="col-sm-8">For our example: <code>.affordability</code></dd>
+      <dt class="col-sm-4 mt-2">Opening Hours:</dt>
+      <dd class="col-sm-8 mt-2">For our example: <code>.store-hours</code></dd>
+    </dl>
+    
+    <div class="alert alert-info small mt-3" role="alert">
+      <span class="text-primary me-2 bi bi-info-circle-fill" aria-hidden="true"></span>
+      <strong>Pro Tip:</strong> Check the placeholder text in the input fields to see the default class names the tool recognizes, such as <code>.price-range</code> and <code>.opening-hours</code>. Using these classes in your HTML can make analysis automatic.
+    </div>
+
+    <p class="fw-bold mt-2">The Result: You transform your contact details into a rich, machine-readable format that helps Google answer your customers' most urgent questions—"Are you open?" and "Where are you?"—before they even visit your site.</p>
+</template><!-- ================== Job Posting Identifiers ================== -->
+<template id="help-jobposting-identifiers">
+    <h4>Strategic Goal:</h4>
+    <p>To have your job openings featured in the interactive <a href="https://developers.google.com/search/docs/appearance/structured-data/job-posting" target="_blank" rel="noopener">Google for Jobs</a> experience. This dramatically increases the visibility of your listings, attracts qualified candidates, and can significantly reduce your recruitment costs.</p>
+    
+    <hr class="my-3">
+    
+    <h4>How Auto-Detection Works:</h4>
+    <p>The tool is designed to find job listings by first identifying a main "Job Container" (e.g., <code>.job-opening</code>). Once found, it searches within that container for key details:</p>
+    <ol>
+        <li><strong>Job Title:</strong> It looks for the title in headings (<code>h1, h2, h3</code>) or elements with a class like <code>.job-title</code>.</li>
+        <li><strong>Date Posted, Location, and Salary:</strong> It then scans for these details using common class names like <code>.date-posted</code>, <code>.job-location</code>, and <code>.salary</code>.</li>
+    </ol>
+    <p class="mt-2">
+        <strong>The Intelligent Touch:</strong> The tool automatically links the job posting to the <strong>Hiring Organization</strong> by reusing the `Organization` data it has already found on the page, and includes the page's meta description as a fallback for the job description.
+    </p>
+
+    <hr class="my-3">
+
+    <h4>Example Generated Schema:</h4>
+    <p>A successful analysis will produce a valid JSON-LD schema like this:</p>
+    
+    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#example-job-schema" aria-expanded="false" aria-controls="example-job-schema">
+        <span class="bi bi-code-slash me-1" aria-hidden="true"></span> Show/Hide Example Code
+    </button>
+    
+    <div class="collapse mt-2" id="example-job-schema">
+        <pre><code class="language-json">{
+  "@context": "https://schema.org",
+  "@type": "JobPosting",
+  "title": "Senior Frontend Developer",
+  "description": "A detailed job description...",
+  "datePosted": "2025-10-15",
+  "hiringOrganization": {
+    "@type": "Organization",
+    "name": "Your Company Name",
+    "logo": "https://example.com/images/logo.png"
+  },
+  "jobLocation": {
+    "@type": "Place",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Remote"
+    }
+  },
+  "baseSalary": {
+    "@type": "MonetaryAmount",
+    "currency": "USD",
+    "value": {
+      "@type": "QuantitativeValue",
+      "value": "120000",
+      "unitText": "YEAR"
+    }
+  }
+}</code></pre>
+    </div>
+
+    <hr class="my-3">
+
+    <h4>The Challenge: Your Custom Job Board Design</h4>
+    <p>Every careers page is different. If your theme uses custom class names, you'll need to map them for the tool. Imagine your HTML is:</p>
+    
+    <pre><code class="language-html">&lt;!-- A custom job listing --&gt;
+&lt;article class="career-opportunity"&gt;
+  &lt;h1 class="career-title"&gt;Senior Frontend Developer&lt;/h1&gt;
+  &lt;div class="career-meta"&gt;
+    &lt;span class="posted-on"&gt;Posted: 2025-10-15&lt;/span&gt;
+    &lt;span class="work-location"&gt;Remote&lt;/span&gt;
+    &lt;span class="compensation"&gt;$120,000/year&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/article&gt;</code></pre>
+
+    <h5 class="mt-3">Your Solution: Precision Guidance</h5>
+    <p>Provide the tool with the direct CSS selectors for your unique design:</p>
+    
+    <dl class="row">
+        <dt class="col-sm-4">Job Container:</dt>
+        <dd class="col-sm-8">For our example: <code>.career-opportunity</code></dd>
+        <dt class="col-sm-4 mt-2">Job Title:</dt>
+        <dd class="col-sm-8 mt-2">For our example: <code>.career-title</code></dd>
+        <dt class="col-sm-4 mt-2">Date Posted:</dt>
+        <dd class="col-sm-8 mt-2">For our example: <code>.posted-on</code></dd>
+        <dt class="col-sm-4 mt-2">Location:</dt>
+        <dd class="col-sm-8 mt-2">For our example: <code>.work-location</code></dd>
+        <dt class="col-sm-4 mt-2">Salary:</dt>
+        <dd class="col-sm-8 mt-2">For our example: <code>.compensation</code></dd>
+    </dl>
+    
+    <div class="alert alert-info small mt-3" role="alert">
+      <span class="text-primary me-2 bi bi-info-circle-fill" aria-hidden="true"></span>
+      <strong>Pro Tip:</strong> Check the placeholder text in the input fields to see all the default class names. Providing a "Job Container" helps the tool accurately isolate each job posting on a page with multiple listings.
+    </div>
+
+    <p class="fw-bold mt-2">The Result: You turn your simple careers page into a powerful recruitment magnet, ensuring your job listings are structured perfectly to appear in Google's rich job search interface.</p>
+
+    <hr class="my-3">
+    
+    <h4 class="text-danger">CRITICAL: The Speed Advantage - Using the Indexing API</h4>
+    <p>In the fast-paced world of recruitment, waiting days for Google to discover your new job listing is not an option. While sitemaps are useful, Google explicitly recommends a more powerful tool for time-sensitive content like job postings.</p>
+    
+    <div class="alert alert-danger small mt-3" role="alert">
+      <div class="d-flex">
+          <span class="h4 text-danger-emphasis me-3 bi bi-lightning-charge-fill" aria-hidden="true"></span>
+          <div>
+              <h5 class="alert-heading h6">Action Required: Implement the Indexing API</h5>
+              <p>The <strong>Indexing API</strong> allows you to directly notify Google the moment a job is posted, updated, or filled. This can reduce the time to appear in search results from days to hours, or even minutes.</p>
+              <a href="https://developers.google.com/search/apis/indexing-api/v3/quickstart" class="btn btn-danger btn-sm" target="_blank" rel="noopener">
+                  Go to Google's Indexing API Guide <i class="bi bi-box-arrow-up-right ms-1"></i>
+              </a>
+          </div>
+      </div>
+    </div>
+    <p class="mt-2 small text-muted">Think of it as a direct phone call to Google versus sending a letter in the mail. For job listings, you always want to make the phone call. Integrating the Indexing API is the single most impactful technical step you can take after generating your schema.</p>
+
+</template><!-- ================== Software Application Identifiers ================== -->
+<template id="help-softwareapplication-identifiers">
+    <h4>Strategic Goal:</h4>
+    <p>To qualify for a <a href="https://developers.google.com/search/docs/appearance/structured-data/software-app" target="_blank" rel="noopener">Software App Rich Result</a>. This enhances your search appearance with ratings, price, and platform, attracting high-intent users looking for software solutions.</p>
+    
+    <hr class="my-3">
+    
+    <h4>How Auto-Detection Works:</h4>
+    <p>Schema Architect identifies software pages by looking for a dedicated container (like <code>.software-info</code>) and then extracts the following key details within it:</p>
+    <ol>
+        <li><strong>Name (Required):</strong> It searches for the app's name using selectors like <code>.app-title</code> or a heading (<code>h1, h2, h3</code>).</li>
+        <li><strong>Price & Rating:</strong> It looks for price (<code>.app-price</code>) and rating (<code>.rating</code>) information.</li>
+        <li><strong>Category & OS:</strong> It searches for the category (<code>.app-category</code>) and operating system (<code>.app-os</code>, <code>.platform</code>).</li>
+    </ol>
+    <p class="mt-2">
+        <strong>The Intelligent Touch:</strong> The tool is built to satisfy Google's strict guidelines. It knows that a valid <code>SoftwareApplication</code> schema **must** have either an <code>offers</code> (price) or an <code>aggregateRating</code> property. If it finds neither, it will automatically generate a default "free" offer to ensure your schema is valid.
+    </p>
+
+    <hr class="my-3">
+
+    <h4>Example Generated Schema:</h4>
+    <p>A successful analysis will produce a valid JSON-LD schema like this:</p>
+
+    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#example-software-schema" aria-expanded="false" aria-controls="example-software-schema">
+        <span class="bi bi-code-slash me-1" aria-hidden="true"></span> Show/Hide Example Code
+    </button>
+    
+    <div class="collapse mt-2" id="example-software-schema">
+        <pre><code class="language-json">{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Architect Pro",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Windows, macOS, Linux",
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.8",
+    "ratingCount": "125"
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "199",
+    "priceCurrency": "USD"
+  }
+}</code></pre>
+    </div>
+
+    <hr class="my-3">
+
+    <h4>The Challenge: Your Custom Software Listing</h4>
+    <p>If your software's page uses a unique layout, you'll need to guide the tool. Assume your HTML is:</p>
+    
+    <pre><code class="language-html">&lt;!-- A custom software details block --&gt;
+&lt;article class="app-profile"&gt;
+  &lt;h1 class="app-heading"&gt;Architect Pro&lt;/h1&gt;
+  &lt;div class="review-summary"&gt;Score: 4.8&lt;/div&gt;
+  &lt;span class="cost"&gt;$199&lt;/span&gt;
+  &lt;p&gt;Genre: &lt;span class="software-genre"&gt;BusinessApplication&lt;/span&gt;&lt;/p&gt;
+  &lt;p&gt;Platform: &lt;span class="platform-support"&gt;Windows, macOS&lt;/span&gt;&lt;/p&gt;
+&lt;/article&gt;</code></pre>
+
+    <h5 class="mt-3">Your Solution: Precision Guidance</h5>
+    <p>Provide the tool with the direct CSS selectors for your unique design:</p>
+    
+    <dl class="row">
+        <dt class="col-sm-4">App Container:</dt>
+        <dd class="col-sm-8">For our example: <code>.app-profile</code></dd>
+        <dt class="col-sm-4 mt-2">App Name:</dt>
+        <dd class="col-sm-8 mt-2">For our example: <code>.app-heading</code></dd>
+        <dt class="col-sm-4 mt-2">Rating:</dt>
+        <dd class="col-sm-8 mt-2">For our example: <code>.review-summary</code></dd>
+        <dt class="col-sm-4 mt-2">Price:</dt>
+        <dd class="col-sm-8 mt-2">For our example: <code>.cost</code></dd>
+        <dt class="col-sm-4 mt-2">Category:</dt>
+        <dd class="col-sm-8 mt-2">For our example: <code>.software-genre</code></dd>
+        <dt class="col-sm-4 mt-2">Operating Sys.:</dt>
+        <dd class="col-sm-8 mt-2">For our example: <code>.platform-support</code></dd>
+    </dl>
+    
+    <div class="alert alert-info small mt-3" role="alert">
+        <span class="text-primary me-2 bi bi-info-circle-fill" aria-hidden="true"></span>
+        <strong>Pro Tip:</strong> The app's `name` is mandatory. The tool will always try to find it within the "App Container". If a container isn't specified, it will search the whole page.
+    </div>
+
+    <p class="fw-bold mt-2">The Result: You ensure your software's technical details are perfectly structured, enabling Google to showcase your app to the right audience with all the compelling details.</p>
+</template><!-- ================== Course Identifiers ================== -->
+<template id="help-course-identifiers">
+    <h4>Strategic Goal:</h4>
+    <p>To have your educational content featured in <a href="https://developers.google.com/search/docs/appearance/structured-data/course" target="_blank" rel="noopener">Course Rich Results</a>. This highlights your courses directly in search, showcasing the provider and description, which is ideal for attracting students and learners.</p>
+    
+    <hr class="my-3">
+    
+    <h4>How Auto-Detection Works:</h4>
+    <p>The tool is designed to understand course catalogs by looking for a main container for the entire list, and then analyzing each individual course listing within it.</p>
+    <ol>
+        <li><strong>It finds the "List Container"</strong> which holds all the courses, using selectors like <code>.course-list</code> or <code>.course-catalog</code>.</li>
+        <li><strong>Within that list, it finds each "Item Container"</strong> using selectors like <code>.course-listing</code>.</li>
+        <li><strong>For each course item,</strong> it extracts the <strong>Name</strong> (<code>.course-title</code>), <strong>Provider</strong> (<code>.course-provider</code>), and <strong>Description</strong> (<code>.course-description</code>).</li>
+    </ol>
+    <p class="mt-2">
+        <strong>The Intelligent Touch:</strong> The tool correctly structures the output as an <code>ItemList</code> containing multiple <code>Course</code> items, a strict requirement from Google. It also automatically links to the course page if an <code>&lt;a&gt;</code> tag is found within the item container.
+    </p>
+
+    <hr class="my-3">
+
+    <h4>Example Generated Schema:</h4>
+    <p>A successful analysis will produce a valid JSON-LD schema like this:</p>
+    
+    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#example-course-schema" aria-expanded="false" aria-controls="example-course-schema">
+        <span class="bi bi-code-slash me-1" aria-hidden="true"></span> Show/Hide Example Code
+    </button>
+    
+    <div class="collapse mt-2" id="example-course-schema">
+        <pre><code class="language-json">{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "Courses from: Ai8V Academy",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "item": {
+        "@type": "Course",
+        "name": "Learn Advanced Schema",
+        "description": "An in-depth course for SEO professionals.",
+        "url": "https://example.com/courses/advanced-schema",
+        "provider": {
+          "@type": "Organization",
+          "name": "Ai8V Academy"
+        }
+      }
+    }
+  ]
+}</code></pre>
+    </div>
+
+    <hr class="my-3">
+
+    <h4>The Challenge: Your Custom Course Catalogue</h4>
+    <p>If your learning platform uses a custom design, you'll need to map its structure for the tool. Imagine your HTML looks like this:</p>
+    
+    <pre><code class="language-html">&lt;!-- A custom course catalog structure --&gt;
+&lt;div class="university-curriculum"&gt;
+  &lt;div class="subject-module"&gt;
+    &lt;h2 class="subject-title"&gt;Advanced JavaScript&lt;/h2&gt;
+    &lt;p class="subject-summary"&gt;Master modern JS concepts.&lt;/p&gt;
+    &lt;div class="taught-by"&gt;Prof. Ada Lovelace&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+    <h5 class="mt-3">Your Solution: Precision Guidance</h5>
+    <p>Provide the tool with the direct CSS selectors for your unique design:</p>
+    
+    <dl class="row">
+        <dt class="col-sm-4">List Container:</dt>
+        <dd class="col-sm-8">For our example: <code>.university-curriculum</code></dd>
+        <dt class="col-sm-4 mt-2">Item Container:</dt>
+        <dd class="col-sm-8 mt-2">For our example: <code>.subject-module</code></dd>
+        <dt class="col-sm-4 mt-2">Course Name:</dt>
+        <dd class="col-sm-8 mt-2">For our example: <code>.subject-title</code></dd>
+        <dt class="col-sm-4 mt-2">Description:</dt>
+        <dd class="col-sm-8 mt-2">For our example: <code>.subject-summary</code></dd>
+        <dt class="col-sm-4 mt-2">Provider:</dt>
+        <dd class="col-sm-8 mt-2">For our example: <code>.taught-by</code></dd>
+    </dl>
+    
+    <div class="alert alert-info small mt-3" role="alert">
+        <span class="text-primary me-2 bi bi-info-circle-fill" aria-hidden="true"></span>
+        <strong>Pro Tip:</strong> Google requires at least three courses for a valid rich result. Ensure your page and "List Container" contain three or more "Item Container" elements to be eligible.
+    </div>
+
+    <p class="fw-bold mt-2">The Result: By precisely mapping your entire course structure, you enable the tool to build a complete and valid <code>ItemList</code>, ensuring your educational content is perfectly positioned to attract learners from Google Search.</p>
+</template></div>
+    <div class="modal fade" role="dialog" tabindex="-1" id="inspectorModal" aria-labelledby="inspectorModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="text-success-emphasis modal-title h5" id="inspectorModalLabel"><span class="text-primary me-2 bi bi-crosshair" aria-hidden="true"></span> Element Inspector: Click an element to select its CSS selector </h3><button class="btn-close ms-auto me-0" aria-label="Close" data-bs-dismiss="modal" type="button"></button>
+                </div>
+                <div class="modal-body p-0" style="overflow:hidden;"><iframe id="inspectorFrame" title="Interactive page inspector for selecting CSS selectors" style="width:100%;height:100%;border:none;" sandbox="allow-scripts allow-forms allow-popups"></iframe></div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" role="dialog" tabindex="-1" id="hardResetConfirmModal" aria-labelledby="hardResetConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header text-white bg-danger">
+                    <h3 class="text-success-emphasis modal-title h5" id="hardResetConfirmModalLabel"><span class="text-primary me-2 bi bi-exclamation-octagon-fill" aria-hidden="true"></span> Confirm Hard Reset</h3><button class="btn-close btn-close-white" aria-label="Close" data-bs-dismiss="modal" type="button"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="fs-5 fw-bold text-danger"><span aria-hidden="true">⚠️</span> FINAL WARNING</p>
+                    <p>This will permanently delete <strong>ALL</strong> app data:</p>
+                    <ul class="text-danger">
+                        <li>All saved projects and templates</li>
+                        <li>All entity management data</li>
+                        <li>All cached analyses</li>
+                    </ul>
+                    <div class="mt-3"><label class="form-label" for="hardResetConfirmInput"> Type <code class="text-warning bg-dark px-2 py-1">DELETE EVERYTHING</code> to confirm: </label><input type="text" class="form-control" id="hardResetConfirmInput" placeholder="Type here to confirm..."></div>
+                </div>
+                <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancel</button><button class="btn btn-danger" id="confirmHardResetBtn" type="button"><span class="text-primary me-1 bi bi-trash3-fill" aria-hidden="true"></span> Yes, Hard Reset</button></div>
+            </div>
+        </div>
+    </div>
+    <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style="z-index:1100;"></div><script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- 1. Element Cache ---
+        const switchEl = document.getElementById('productHasVariantsSwitch');
+        const singleFields = document.getElementById('singleProductFields');
+        const variantFields = document.getElementById('variantProductFields');
+        const addVariantBtn = document.getElementById('addVariantBtn');
+        const variantsContainer = document.getElementById('variantsContainer');
+        const variantTemplate = document.getElementById('variantTemplate');
+        const variesByCheckboxes = document.querySelectorAll('.varies-by-checkbox');
+        const addMemberPriceBtn = document.getElementById('addMemberPriceBtn');
+        const memberPricingContainer = document.getElementById('memberPricingContainer');
+        const memberPriceTemplate = document.getElementById('memberPriceTemplate');
+
+        // --- 2. Central Trigger Function ---
+        function triggerSchemaUpdate() {
+            const selectedSuggestion = document.querySelector('.schema-suggestion[aria-pressed="true"]');
+            if (selectedSuggestion) {
+                selectedSuggestion.click();
+            }
+        }
+
+        // --- 3. Helper Functions for Dynamic UI ---
+
+        function addVariantRow() {
+            if (!variantTemplate || !variantsContainer) return;
+            const clone = variantTemplate.content.cloneNode(true);
+            const dynamicFieldsContainer = clone.querySelector('.varies-by-fields-container');
+            variesByCheckboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    const propertyName = checkbox.id.replace('variesBy', '');
+                    const propertyId = propertyName.toLowerCase();
+                    const fieldHtml = `<div class="input-group input-group-sm mt-2"><span class="input-group-text">${propertyName}</span><input type="text" class="form-control variant-prop" data-prop-name="${propertyId}" placeholder="Value for ${propertyName}"></div>`;
+                    dynamicFieldsContainer.insertAdjacentHTML('beforeend', fieldHtml);
+                }
+            });
+            variantsContainer.appendChild(clone);
+        }
+
+        function addMemberPriceRow() {
+            if (!memberPriceTemplate || !memberPricingContainer) return;
+            const empData = StorageManager.get(StorageManager.KEYS.EMP) || {};
+            const tiers = empData.loyaltyProgram?.tiers || [];
+            if (tiers.length === 0) {
+                showToast('Please define loyalty tiers in the EMP first.', 'warning');
+                return;
+            }
+            const clone = memberPriceTemplate.content.cloneNode(true);
+            const selectEl = clone.querySelector('.member-tier-select');
+            tiers.forEach(tier => {
+                const option = document.createElement('option');
+                option.value = tier.id;
+                option.textContent = tier.name;
+                selectEl.appendChild(option);
+            });
+            memberPricingContainer.appendChild(clone);
+        }
+
+        // --- 4. Event Listeners ---
+
+        if (addVariantBtn) {
+            addVariantBtn.addEventListener('click', addVariantRow);
+        }
+        if (addMemberPriceBtn) {
+            addMemberPriceBtn.addEventListener('click', addMemberPriceRow);
+        }
+
+        // ========== START: CRITICAL FIX FOR REMOVE BUTTONS ==========
+        // Use Event Delegation for dynamically added remove buttons
+        if (variantsContainer) {
+            variantsContainer.addEventListener('click', (e) => {
+                if (e.target && e.target.closest('.remove-variant-btn')) {
+                    e.target.closest('.variant-row').remove();
+                }
+            });
+        }
+        if (memberPricingContainer) {
+            memberPricingContainer.addEventListener('click', (e) => {
+                if (e.target && e.target.closest('.remove-member-price-btn')) {
+                    e.target.closest('.member-price-row').remove();
+                }
+            });
+        }
+
+        // Variant Switch Logic
+        if (switchEl) {
+            switchEl.addEventListener('change', () => {
+                const isVariantMode = switchEl.checked;
+                singleFields.style.display = isVariantMode ? 'none' : 'block';
+                variantFields.style.display = isVariantMode ? 'block' : 'none';
+                triggerSchemaUpdate(); // Trigger update on mode switch
+            });
+        }
+
+        // MutationObservers for dynamic containers to trigger updates
+        const dynamicContainers = [
+            { el: variantsContainer, name: 'variantsContainer' },
+            { el: memberPricingContainer, name: 'memberPricingContainer' }
+        ];
+
+        dynamicContainers.forEach(({ el }) => {
+            if (el) {
+                const observer = new MutationObserver(() => {
+                    // This observer triggers when rows are added or removed
+                    triggerSchemaUpdate();
+                });
+                observer.observe(el, { childList: true });
+                // This listener triggers when values inside the rows change
+                el.addEventListener('change', triggerSchemaUpdate);
+            }
+        });
+
+        // Watch other critical inputs
+        const inputsToWatch = ['#productGroupId', '#customProductGtin', '#customProductMpn', '#customProductColor', '#customProductMaterial', '#customProductPattern', '#customProductGender', '#customProductAgeGroup'];
+        inputsToWatch.forEach(selector => {
+            const input = document.querySelector(selector);
+            if (input) {
+                input.addEventListener('change', triggerSchemaUpdate);
+            }
+        });
+    });
+</script>
+    <script src="assets/bootstrap/js/bootstrap.min.js" defer></script>
+    <script src="assets/js/lottie-player.min.js" defer></script>
+    <script src="assets/js/schema-architect/1-storageManager.js" defer></script>
+    <script src="assets/js/schema-architect/2-toast-utility.js" defer></script>
+    <script src="assets/js/schema-architect/3-storageMonitor.js" defer></script>
+    <script src="assets/js/schema-architect/4-jobLocationStrategies.js" defer></script>
+    <script src="assets/js/schema-architect/5-dynamicPromptGenerator.js" defer></script>
+    <script src="assets/js/schema-architect/6-entities.js" defer></script>
+    <script src="assets/js/schema-architect/7-projects.js" defer></script>
+    <script src="assets/js/schema-architect/8-schema-architect.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/components/prism-core.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/plugins/autoloader/prism-autoloader.min.js" defer></script>
+    <script src="assets/js/schema-architect/9-default-selectors.js" defer></script>
+    <script src="assets/js/schema-architect/91-help-system.js" defer></script>
+    <script src="assets/js/schema-architect/92-inspector.js" defer></script>
+    <script src="assets/js/schema-architect/93-smart-selector-analyzer.js" defer></script>
+    <script src="assets/js/94-meta-intelligence-engine.js" defer></script>
+</body>
+
+</html>
